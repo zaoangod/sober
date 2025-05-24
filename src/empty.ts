@@ -1,12 +1,12 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
 
 type Props = {}
 
-const name = 's-empty'
+const name         = 's-empty'
 const props: Props = {}
 
-const style = /*css*/`
+const style    = /*css*/`
 :host{
   display: flex;
   justify-content: center;
@@ -48,66 +48,69 @@ const template = /*html*/`
 </slot>
 <slot></slot>`
 
-class Empty extends useElement({ style, template, props }) { }
+class Empty extends useElement({style, template, props}) {
+}
 
 Empty.define(name)
 
-export { Empty }
+export {Empty}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Empty
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Empty
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & Empty
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & Empty
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }

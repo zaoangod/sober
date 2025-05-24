@@ -1,13 +1,12 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
-import { Fold } from './fold.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
+import {Fold} from './fold.js'
 import './ripple.js'
 
 type Props = {}
 
-const name = 's-menu'
-const props: Props = {
-}
+const name         = 's-menu'
+const props: Props = {}
 
 const style = /*css*/`
 :host{
@@ -38,17 +37,18 @@ const template = /*html*/`
 <slot></slot>
 `
 
-class Menu extends useElement({ style, template, props }) { }
-
-type ItemProps = {
-  checked: boolean
-  folded: boolean
+class Menu extends useElement({style, template, props}) {
 }
 
-const itemName = 's-menu-item'
+type ItemProps = {
+    checked: boolean
+    folded: boolean
+}
+
+const itemName             = 's-menu-item'
 const itemProps: ItemProps = {
-  checked: false,
-  folded: true
+    checked: false,
+    folded : true
 }
 
 const itemStyle = /*css*/`
@@ -145,100 +145,103 @@ const itemTemplate = /*html*/`
 `
 
 class MenuItem extends useElement({
-  style: itemStyle,
-  template: itemTemplate,
-  props: itemProps,
-  syncProps: true,
-  setup(shadowRoot) {
-    const container = shadowRoot.querySelector<HTMLElement>('.container')!
-    const fold = shadowRoot.querySelector<Fold>('.fold')!
-    const menu = shadowRoot.querySelector<HTMLSlotElement>('slot[name=menu]')!
-    fold.onclick = (event) => event.stopPropagation()
-    menu.onslotchange = () => container.classList[menu.assignedElements().length > 0 ? 'add' : 'remove']('show-menu')
-    container.onclick = () => {
-      if (!container.classList.contains('show-menu')) return
-      this.folded = !this.folded
+    style    : itemStyle,
+    template : itemTemplate,
+    props    : itemProps,
+    syncProps: true,
+    setup(shadowRoot) {
+        const container   = shadowRoot.querySelector<HTMLElement>('.container')!
+        const fold        = shadowRoot.querySelector<Fold>('.fold')!
+        const menu        = shadowRoot.querySelector<HTMLSlotElement>('slot[name=menu]')!
+        fold.onclick      = (event) => event.stopPropagation()
+        menu.onslotchange = () => container.classList[menu.assignedElements().length > 0 ? 'add' : 'remove']('show-menu')
+        container.onclick = () => {
+            if (!container.classList.contains('show-menu')) return
+            this.folded = !this.folded
+        }
+        return {
+            folded: (value) => fold.folded = value
+        }
     }
-    return {
-      folded: (value) => fold.folded = value
-    }
-  }
-}) { }
+}) {
+}
 
 Menu.define(name)
 MenuItem.define(itemName)
 
-export { Menu, MenuItem }
+export {Menu, MenuItem}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Menu
-    [itemName]: MenuItem
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-        //@ts-ignore
-        [itemName]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<ItemProps>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Menu
+        [itemName]: MenuItem
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+                //@ts-ignore
+                [itemName]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<ItemProps>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & Menu
-    [itemName]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<ItemProps>
-    } & MenuItem
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & Menu
+        [itemName]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<ItemProps>
+        } & MenuItem
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
-      //@ts-ignore
-      [itemName]: IntrinsicElements['div'] & Partial<ItemProps>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+            //@ts-ignore
+            [itemName]: IntrinsicElements['div'] & Partial<ItemProps>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
-      //@ts-ignore
-      [itemName]: JSX.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+            //@ts-ignore
+            [itemName]: JSX.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
-      //@ts-ignore
-      [itemName]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+            //@ts-ignore
+            [itemName]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+        }
     }
-  }
 }

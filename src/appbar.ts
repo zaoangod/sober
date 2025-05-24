@@ -1,10 +1,10 @@
-import { useElement, supports } from './core/element.js'
-import { mediaQueries } from './core/utils/mediaQuery.js'
-import { Theme } from './core/theme.js'
+import {supports, useElement} from './core/element.js'
+import {mediaQueries} from './core/utils/mediaQuery.js'
+import {Theme} from './core/theme.js'
 
 type Props = {}
 
-const name = 's-appbar'
+const name         = 's-appbar'
 const props: Props = {}
 
 const style = /*css*/`
@@ -98,75 +98,80 @@ const template = /*html*/`
 `
 
 class Appbar extends useElement({
-  style, template, props,
-  setup(shadowRoot) {
-    if (!supports.CSSContainer) {
-      const view = shadowRoot.querySelector<HTMLDivElement>('.view')!
-      new ResizeObserver(() => {
-        view.classList.toggle('s-laptop', this.offsetWidth <= mediaQueries.laptop)
-        view.classList.toggle('s-tablet', this.offsetWidth <= mediaQueries.tablet)
-      }).observe(this)
+    style,
+    template,
+    props,
+    setup(shadowRoot) {
+        if (!supports.CSSContainer) {
+            const view = shadowRoot.querySelector<HTMLDivElement>('.view')!
+            new ResizeObserver(() => {
+                view.classList.toggle('s-laptop', this.offsetWidth <= mediaQueries.laptop)
+                view.classList.toggle('s-tablet', this.offsetWidth <= mediaQueries.tablet)
+            }).observe(this)
+        }
     }
-  }
-}) { }
+}) {
+}
 
 Appbar.define(name)
 
-export { Appbar }
+export {Appbar}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Appbar
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Appbar
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & Appbar
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & Appbar
+    }
 }
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }

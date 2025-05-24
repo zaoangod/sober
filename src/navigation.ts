@@ -1,17 +1,17 @@
-import { useElement } from './core/element.js'
-import { Select } from './core/utils/select.js'
-import { Theme } from './core/theme.js'
+import {useElement} from './core/element.js'
+import {Select} from './core/utils/select.js'
+import {Theme} from './core/theme.js'
 import './ripple.js'
 
 type Props = {
-  mode: 'bottom' | 'rail',
-  value: string
+    mode: 'bottom' | 'rail',
+    value: string
 }
 
-const name = 's-navigation'
+const name         = 's-navigation'
 const props: Props = {
-  mode: 'bottom',
-  value: ''
+    mode : 'bottom',
+    value: ''
 }
 
 const style = /*css*/`
@@ -58,36 +58,37 @@ const template = /*html*/`
 `
 
 class Navigation extends useElement({
-  style, template, props, syncProps: true,
-  setup(shadowRoot) {
-    const slot = shadowRoot.querySelector<HTMLSlotElement>('#slot')!
-    const select = new Select({ context: this, class: NavigationItem, slot })
-    return {
-      expose: {
-        get options() {
-          return select.list
-        },
-        get selectedIndex() {
-          return select.selectedIndex
+    style, template, props, syncProps: true,
+    setup(shadowRoot) {
+        const slot   = shadowRoot.querySelector<HTMLSlotElement>('#slot')!
+        const select = new Select({context: this, class: NavigationItem, slot})
+        return {
+            expose: {
+                get options() {
+                    return select.list
+                },
+                get selectedIndex() {
+                    return select.selectedIndex
+                }
+            },
+            value : {
+                get: () => select.value,
+                set: (value) => select.value = value
+            }
         }
-      },
-      value: {
-        get: () => select.value,
-        set: (value) => select.value = value
-      }
     }
-  }
-}) { }
-
-type ItemProps = {
-  selected: boolean,
-  value: string
+}) {
 }
 
-const itemName = 's-navigation-item'
+type ItemProps = {
+    selected: boolean,
+    value: string
+}
+
+const itemName             = 's-navigation-item'
 const itemProps: ItemProps = {
-  selected: false,
-  value: ''
+    selected: false,
+    value   : ''
 }
 
 const itemStyle = /*css*/`
@@ -154,99 +155,102 @@ const itemTemplate = /*html*/`
 `
 
 class NavigationItem extends useElement({
-  style: itemStyle,
-  template: itemTemplate,
-  props: itemProps,
-  syncProps: ['selected'],
-  setup() {
-    this.addEventListener('click', () => {
-      if (this.selected) return
-      if (!(this.parentNode instanceof Navigation)) return
-      this.dispatchEvent(new Event(`${name}:select`, { bubbles: true }))
-    })
-    return {
-      selected: () => {
-        if (!(this.parentNode instanceof Navigation)) return
-        this.dispatchEvent(new Event(`${name}:update`, { bubbles: true }))
-      }
+    style    : itemStyle,
+    template : itemTemplate,
+    props    : itemProps,
+    syncProps: ['selected'],
+    setup() {
+        this.addEventListener('click', () => {
+            if (this.selected) return
+            if (!(this.parentNode instanceof Navigation)) return
+            this.dispatchEvent(new Event(`${name}:select`, {bubbles: true}))
+        })
+        return {
+            selected: () => {
+                if (!(this.parentNode instanceof Navigation)) return
+                this.dispatchEvent(new Event(`${name}:update`, {bubbles: true}))
+            }
+        }
     }
-  }
-}) { }
+}) {
+}
 
 Navigation.define(name)
 NavigationItem.define(itemName)
 
-export { Navigation, NavigationItem }
+export {Navigation, NavigationItem}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Navigation
-    [itemName]: NavigationItem
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-        //@ts-ignore
-        [itemName]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<ItemProps>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Navigation
+        [itemName]: NavigationItem
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+                //@ts-ignore
+                [itemName]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<ItemProps>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & Navigation
-    [itemName]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<ItemProps>
-    } & NavigationItem
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & Navigation
+        [itemName]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<ItemProps>
+        } & NavigationItem
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
-      //@ts-ignore
-      [itemName]: IntrinsicElements['div'] & Partial<ItemProps>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+            //@ts-ignore
+            [itemName]: IntrinsicElements['div'] & Partial<ItemProps>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
-      //@ts-ignore
-      [itemName]: JSX.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+            //@ts-ignore
+            [itemName]: JSX.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
-      //@ts-ignore
-      [itemName]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+            //@ts-ignore
+            [itemName]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+        }
     }
-  }
 }

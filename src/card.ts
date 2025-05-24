@@ -1,16 +1,16 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
 import './ripple.js'
 
 type Props = {
-  type: 'elevated' | 'filled' | 'outlined'
-  clickable: boolean
+    type: 'elevated' | 'filled' | 'outlined'
+    clickable: boolean
 }
 
-const name = 's-card'
+const name         = 's-card'
 const props: Props = {
-  type: 'elevated',
-  clickable: false
+    type     : 'elevated',
+    clickable: false
 }
 
 const style = /*css*/`
@@ -107,70 +107,73 @@ const template = /*html*/`
 `
 
 class Card extends useElement({
-  style, template, props, syncProps: true,
-  setup(shadowRoot) {
-    const action = shadowRoot.querySelector<HTMLElement>('slot[name=action]')!
-    action.onpointerdown = (e) => e.stopPropagation()
-  }
-}) { }
+    style, template, props, syncProps: true,
+    setup(shadowRoot) {
+        const action         = shadowRoot.querySelector<HTMLElement>('slot[name=action]')!
+        action.onpointerdown = (e) => e.stopPropagation()
+    }
+}) {
+}
 
 Card.define(name)
 
-export { Card }
+export {Card}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Card
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Card
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & Card
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & Card
+    }
 }
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }

@@ -1,21 +1,21 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
 
 type Props = {
-  placeholder: string
-  disabled: boolean
-  value: string
-  maxLength: number
-  readOnly: boolean
+    placeholder: string
+    disabled: boolean
+    value: string
+    maxLength: number
+    readOnly: boolean
 }
 
-const name = 's-search'
+const name         = 's-search'
 const props: Props = {
-  placeholder: '',
-  disabled: false,
-  value: '',
-  maxLength: -1,
-  readOnly: false
+    placeholder: '',
+    disabled   : false,
+    value      : '',
+    maxLength  : -1,
+    readOnly   : false
 }
 
 const style = /*css*/`
@@ -120,84 +120,87 @@ const template = /*html*/`
 `
 
 class Search extends useElement({
-  style, template, props, syncProps: ['disabled', 'readOnly'],
-  setup(shadowRoot) {
-    const input = shadowRoot.querySelector<HTMLInputElement>('input')!
-    const dropdown = shadowRoot.querySelector<HTMLSlotElement>('[name=dropdown]')!
-    dropdown.onmousedown = (e) => e.preventDefault()
-    input.onchange = () => this.dispatchEvent(new Event('change'))
-    return {
-      expose: {
-        get native() {
-          return input
+    style, template, props, syncProps: ['disabled', 'readOnly'],
+    setup(shadowRoot) {
+        const input          = shadowRoot.querySelector<HTMLInputElement>('input')!
+        const dropdown       = shadowRoot.querySelector<HTMLSlotElement>('[name=dropdown]')!
+        dropdown.onmousedown = (e) => e.preventDefault()
+        input.onchange       = () => this.dispatchEvent(new Event('change'))
+        return {
+            expose     : {
+                get native() {
+                    return input
+                }
+            },
+            value      : {
+                get: () => input.value,
+                set: (value) => input.value = value
+            },
+            placeholder: (placeholder) => input.placeholder = placeholder,
+            maxLength  : (maxLength) => input.maxLength = maxLength,
+            readOnly   : (readOnly) => input.readOnly = readOnly
         }
-      },
-      value: {
-        get: () => input.value,
-        set: (value) => input.value = value
-      },
-      placeholder: (placeholder) => input.placeholder = placeholder,
-      maxLength: (maxLength) => input.maxLength = maxLength,
-      readOnly: (readOnly) => input.readOnly = readOnly
     }
-  }
-}) { }
+}) {
+}
 
 Search.define(name)
 
-export { Search }
+export {Search}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Search
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Search
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      $props: HTMLAttributes & Partial<Props>
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            $props: HTMLAttributes & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }

@@ -1,35 +1,35 @@
-import { useElement } from './core/element.js'
-import { dateFormat } from './core/utils/dateFormat.js'
-import { Theme } from './core/theme.js'
-import { Field } from './field.js'
-import { Dialog } from './dialog.js'
-import { Date as DateElement } from './date.js'
-import { Ripple } from './ripple.js'
+import {useElement} from './core/element.js'
+import {dateFormat} from './core/utils/dateFormat.js'
+import {Theme} from './core/theme.js'
+import {Field} from './field.js'
+import {Dialog} from './dialog.js'
+import {Date as DateElement} from './date.js'
+import {Ripple} from './ripple.js'
 
 type Props = {
-  value: string
-  min: string
-  max: string
-  label: string
-  positiveText: string
-  negativeText: string
-  format: string
-  locale: string
+    value: string
+    min: string
+    max: string
+    label: string
+    positiveText: string
+    negativeText: string
+    format: string
+    locale: string
 }
 
-const name = 's-date-picker'
+const name         = 's-date-picker'
 const props: Props = {
-  value: '',
-  min: '',
-  max: '',
-  label: '',
-  positiveText: '确定',
-  negativeText: '取消',
-  format: 'yyyy-MM-dd',
-  locale: ''
+    value       : '',
+    min         : '',
+    max         : '',
+    label       : '',
+    positiveText: '确定',
+    negativeText: '取消',
+    format      : 'yyyy-MM-dd',
+    locale      : ''
 }
 
-const style = /*css*/`
+const style    = /*css*/`
 :host{
   display: inline-block;
   vertical-align: middle;
@@ -100,128 +100,131 @@ const template = /*html*/`
 `
 
 class DatePicker extends useElement({
-  style, template, props,
-  setup(shadowRoot) {
-    const dialog = shadowRoot.querySelector<Dialog>('s-dialog')!
-    const dateElement = shadowRoot.querySelector<DateElement>('s-date')!
-    const negative = shadowRoot.querySelector<Ripple>('.negative')!
-    const positive = shadowRoot.querySelector<Ripple>('.positive')!
-    const field = shadowRoot.querySelector<Field>('s-field')!
-    const label = shadowRoot.querySelector<HTMLDivElement>('.label')!
-    const view = shadowRoot.querySelector<HTMLDivElement>('.view')!
-    const state = { date: '' }
-    dialog.addEventListener('show', () => {
-      field.fixed = true
-      field.focused = true
-      if (!state.date) {
-        view.textContent = this.label
-        view.style.opacity = '0'
-      }
-    })
-    dialog.onclose = () => {
-      field.focused = false
-      if (!state.date) {
-        field.fixed = false
-      }
-    }
-    positive.onclick = () => {
-      this.value = dateElement.value
-      view.style.removeProperty('opacity')
-      this.dispatchEvent(new Event('change'))
-    }
-    return {
-      value: {
-        get: () => state.date,
-        set: (value) => {
-          state.date = value
-          if (value === '') {
-            dateElement.value = dateFormat(new Date())
-            field.fixed = false
-            view.textContent = ''
-            return
-          }
-          field.fixed = true
-          view.textContent = dateFormat(value, this.format)
-          dateElement.value = value
+    style, template, props,
+    setup(shadowRoot) {
+        const dialog      = shadowRoot.querySelector<Dialog>('s-dialog')!
+        const dateElement = shadowRoot.querySelector<DateElement>('s-date')!
+        const negative    = shadowRoot.querySelector<Ripple>('.negative')!
+        const positive    = shadowRoot.querySelector<Ripple>('.positive')!
+        const field       = shadowRoot.querySelector<Field>('s-field')!
+        const label       = shadowRoot.querySelector<HTMLDivElement>('.label')!
+        const view        = shadowRoot.querySelector<HTMLDivElement>('.view')!
+        const state       = {date: ''}
+        dialog.addEventListener('show', () => {
+            field.fixed   = true
+            field.focused = true
+            if (!state.date) {
+                view.textContent   = this.label
+                view.style.opacity = '0'
+            }
+        })
+        dialog.onclose   = () => {
+            field.focused = false
+            if (!state.date) {
+                field.fixed = false
+            }
         }
-      },
-      locale: {
-        get: () => dateElement.locale,
-        set: (value) => dateElement.locale = value
-      },
-      min: {
-        get: () => dateElement.min,
-        set: (value) => dateElement.min = value
-      },
-      max: {
-        get: () => dateElement.max,
-        set: (value) => dateElement.max = value
-      },
-      label: (value) => label.textContent = value,
-      positiveText: (value) => positive.textContent = value,
-      negativeText: (value) => negative.textContent = value,
+        positive.onclick = () => {
+            this.value = dateElement.value
+            view.style.removeProperty('opacity')
+            this.dispatchEvent(new Event('change'))
+        }
+        return {
+            value       : {
+                get: () => state.date,
+                set: (value) => {
+                    state.date = value
+                    if (value === '') {
+                        dateElement.value = dateFormat(new Date())
+                        field.fixed       = false
+                        view.textContent  = ''
+                        return
+                    }
+                    field.fixed       = true
+                    view.textContent  = dateFormat(value, this.format)
+                    dateElement.value = value
+                }
+            },
+            locale      : {
+                get: () => dateElement.locale,
+                set: (value) => dateElement.locale = value
+            },
+            min         : {
+                get: () => dateElement.min,
+                set: (value) => dateElement.min = value
+            },
+            max         : {
+                get: () => dateElement.max,
+                set: (value) => dateElement.max = value
+            },
+            label       : (value) => label.textContent = value,
+            positiveText: (value) => positive.textContent = value,
+            negativeText: (value) => negative.textContent = value,
+        }
     }
-  }
-}) { }
+}) {
+}
 
 DatePicker.define(name)
 
-export { DatePicker }
+export {DatePicker}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: DatePicker
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: DatePicker
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & DatePicker
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & DatePicker
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }

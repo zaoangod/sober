@@ -1,15 +1,15 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
-import { Popup } from './popup.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
+import {Popup} from './popup.js'
 import './ripple.js'
 import './scroll-view.js'
 
 type Props = {
-  group: 'start' | 'end' | ''
+    group: 'start' | 'end' | ''
 }
-const name = 's-popup-menu'
+const name         = 's-popup-menu'
 const props: Props = {
-  group: ''
+    group: ''
 }
 
 const style = /*css*/`
@@ -52,51 +52,51 @@ const template = /*html*/`
 `
 
 class PopupMenu extends useElement({
-  style, template, props, syncProps: true,
-  setup(shadowRoot) {
-    const popup = shadowRoot.querySelector<Popup>('.popup')!
-    const trigger = shadowRoot.querySelector<HTMLSlotElement>('slot[name=trigger]')!
-    trigger.onclick = (event) => {
-      event.stopPropagation()
-      popup.show()
-    }
-    this.addEventListener(`${name}:click`, (event) => {
-      event.stopPropagation()
-      popup.close()
-    })
-    popup.onclose = (event) => {
-      const target = event.target as Popup
-      if (target.parentNode instanceof ShadowRoot) {
-        const parent = target.parentNode.host
-        if (parent.parentNode instanceof PopupMenu) {
-          parent.parentNode.close()
+    style, template, props, syncProps: true,
+    setup(shadowRoot) {
+        const popup     = shadowRoot.querySelector<Popup>('.popup')!
+        const trigger   = shadowRoot.querySelector<HTMLSlotElement>('slot[name=trigger]')!
+        trigger.onclick = (event) => {
+            event.stopPropagation()
+            popup.show()
         }
-      }
-    }
-    return {
-      onMounted: () => {
-        this.parentNode instanceof PopupMenu && popup.setAttribute('align', 'right')
-      },
-      expose: {
-        get show() {
-          return popup.show
-        },
-        get toggle() {
-          return popup.toggle
-        },
-        get close() {
-          return popup.close
+        this.addEventListener(`${name}:click`, (event) => {
+            event.stopPropagation()
+            popup.close()
+        })
+        popup.onclose = (event) => {
+            const target = event.target as Popup
+            if (target.parentNode instanceof ShadowRoot) {
+                const parent = target.parentNode.host
+                if (parent.parentNode instanceof PopupMenu) {
+                    parent.parentNode.close()
+                }
+            }
         }
-      }
+        return {
+            onMounted: () => {
+                this.parentNode instanceof PopupMenu && popup.setAttribute('align', 'right')
+            },
+            expose   : {
+                get show() {
+                    return popup.show
+                },
+                get toggle() {
+                    return popup.toggle
+                },
+                get close() {
+                    return popup.close
+                }
+            }
+        }
     }
-  }
-}) { }
+}) {
+}
 
 type ItemProps = {}
 
-const itemName = 's-popup-menu-item'
-const itemProps: ItemProps = {
-}
+const itemName             = 's-popup-menu-item'
+const itemProps: ItemProps = {}
 
 const itemStyle = /*css*/`
 :host{
@@ -145,88 +145,91 @@ const itemTemplate = /*html*/`
 `
 
 class PopupMenuItem extends useElement({
-  style: itemStyle,
-  template: itemTemplate,
-  props: itemProps,
-  setup() {
-    this.addEventListener('click', () => this.dispatchEvent(new Event(`${name}:click`, { bubbles: true })))
-  }
-}) { }
+    style   : itemStyle,
+    template: itemTemplate,
+    props   : itemProps,
+    setup() {
+        this.addEventListener('click', () => this.dispatchEvent(new Event(`${name}:click`, {bubbles: true})))
+    }
+}) {
+}
 
 PopupMenu.define(name)
 PopupMenuItem.define(itemName)
 
-export { PopupMenu, PopupMenuItem }
+export {PopupMenu, PopupMenuItem}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: PopupMenu
-    [itemName]: PopupMenuItem
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-        //@ts-ignore
-        [itemName]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<ItemProps>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: PopupMenu
+        [itemName]: PopupMenuItem
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+                //@ts-ignore
+                [itemName]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<ItemProps>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & PopupMenu
-    [itemName]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<ItemProps>
-    } & PopupMenuItem
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & PopupMenu
+        [itemName]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<ItemProps>
+        } & PopupMenuItem
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
-      //@ts-ignore
-      [itemName]: IntrinsicElements['div'] & Partial<ItemProps>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+            //@ts-ignore
+            [itemName]: IntrinsicElements['div'] & Partial<ItemProps>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
-      //@ts-ignore
-      [itemName]: JSX.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+            //@ts-ignore
+            [itemName]: JSX.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
-      //@ts-ignore
-      [itemName]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+            //@ts-ignore
+            [itemName]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+        }
     }
-  }
 }

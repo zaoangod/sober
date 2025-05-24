@@ -1,13 +1,12 @@
-import { useElement, supports } from './core/element.js'
-import { mediaQueries } from './core/utils/mediaQuery.js'
-import { convertCSSDuration } from './core/utils/CSSUtils.js'
-import { Theme } from './core/theme.js'
+import {supports, useElement} from './core/element.js'
+import {mediaQueries} from './core/utils/mediaQuery.js'
+import {convertCSSDuration} from './core/utils/CSSUtils.js'
+import {Theme} from './core/theme.js'
 
 type Props = {}
 
-const name = 's-drawer'
-const props: Props = {
-}
+const name         = 's-drawer'
+const props: Props = {}
 
 const style = /*css*/`
 :host{
@@ -154,127 +153,130 @@ const template = /*html*/`
 type SlotName = 'start' | 'end'
 
 class Drawer extends useElement({
-  style, template, props,
-  setup(shadowRoot) {
-    const scrim = shadowRoot.querySelector<HTMLDivElement>('.scrim')!
-    const slots = {
-      start: shadowRoot.querySelector<HTMLSlotElement>('.start')!,
-      end: shadowRoot.querySelector<HTMLSlotElement>('.end')!
+    style, template, props,
+    setup(shadowRoot) {
+        const scrim             = shadowRoot.querySelector<HTMLDivElement>('.scrim')!
+        const slots             = {
+            start: shadowRoot.querySelector<HTMLSlotElement>('.start')!,
+            end  : shadowRoot.querySelector<HTMLSlotElement>('.end')!
+        }
+        const containerStyle    = getComputedStyle(this)
+        const getAnimateOptions = () => {
+            const easing   = containerStyle.getPropertyValue('--s-motion-easing-standard') || Theme.motionEasingStandard
+            const duration = containerStyle.getPropertyValue('--s-motion-duration-medium4') || Theme.motionDurationMedium4
+            return {easing: easing, duration: convertCSSDuration(duration)}
+        }
+        const getElement        = (name: SlotName = 'start') => slots[name]
+        const getClassName      = (folded?: boolean) => folded ?? this.offsetWidth <= mediaQueries.laptop ? 'show-laptop' : 'show'
+        const getOffset         = (name: SlotName = 'start') => ({start: -1, end: 1}[name])
+        const show              = (slot?: SlotName, folded?: boolean) => {
+            const element   = getElement(slot)
+            const className = getClassName(folded)
+            if (element.classList.contains(className)) return
+            const offset         = getOffset(slot)
+            const animateOptions = getAnimateOptions()
+            element.classList.add(className)
+            scrim.classList.add(className)
+            const keyframes = this.offsetWidth <= mediaQueries.laptop ? {transform: [`translateX(${element.offsetWidth * offset}px)`, `translateX(0)`]} : {width: ['0', element.offsetWidth + 'px']}
+            this.offsetWidth <= mediaQueries.laptop && scrim.animate({opacity: [0, 1]}, animateOptions)
+            element.animate(keyframes, animateOptions)
+        }
+        const close             = (slot?: SlotName, folded?: boolean) => {
+            const element   = getElement(slot)
+            const className = getClassName(folded)
+            if (!element.classList.contains(className)) return
+            const offset          = getOffset(slot)
+            const animateOptions  = getAnimateOptions()
+            const keyframes       = {...this.offsetWidth <= mediaQueries.laptop ? {transform: [`translateX(0)`, `translateX(${element.offsetWidth * offset}px)`]} : {width: [element.offsetWidth + 'px', '0px']}}
+            element.style.display = 'block'
+            element.animate(keyframes, animateOptions).finished.then(() => element.style.removeProperty('display'))
+            this.offsetWidth <= mediaQueries.laptop && scrim.animate({opacity: [1, 0]}, animateOptions)
+            element.classList.remove(className)
+            scrim.classList.remove(className)
+        }
+        const toggle            = (slot?: SlotName, folded?: boolean) => {
+            const element   = getElement(slot)
+            const className = getClassName(folded)
+            element.classList.contains(className) ? close(slot, folded) : show(slot, folded)
+        }
+        scrim.addEventListener('click', () => {
+            close('start', true)
+            close('end', true)
+        })
+        if (!supports.CSSContainer) {
+            new ResizeObserver(() => {
+                scrim.classList.toggle('s-laptop', this.offsetWidth <= mediaQueries.laptop)
+                slots.start.classList.toggle('s-laptop', this.offsetWidth <= mediaQueries.laptop)
+                slots.end.classList.toggle('s-laptop', this.offsetWidth <= mediaQueries.laptop)
+            }).observe(this)
+        }
+        return {
+            expose: {show, close, toggle}
+        }
     }
-    const containerStyle = getComputedStyle(this)
-    const getAnimateOptions = () => {
-      const easing = containerStyle.getPropertyValue('--s-motion-easing-standard') || Theme.motionEasingStandard
-      const duration = containerStyle.getPropertyValue('--s-motion-duration-medium4') || Theme.motionDurationMedium4
-      return { easing: easing, duration: convertCSSDuration(duration) }
-    }
-    const getElement = (name: SlotName = 'start') => slots[name]
-    const getClassName = (folded?: boolean) => folded ?? this.offsetWidth <= mediaQueries.laptop ? 'show-laptop' : 'show'
-    const getOffset = (name: SlotName = 'start') => ({ start: -1, end: 1 }[name])
-    const show = (slot?: SlotName, folded?: boolean) => {
-      const element = getElement(slot)
-      const className = getClassName(folded)
-      if (element.classList.contains(className)) return
-      const offset = getOffset(slot)
-      const animateOptions = getAnimateOptions()
-      element.classList.add(className)
-      scrim.classList.add(className)
-      const keyframes = this.offsetWidth <= mediaQueries.laptop ? { transform: [`translateX(${element.offsetWidth * offset}px)`, `translateX(0)`] } : { width: ['0', element.offsetWidth + 'px'] }
-      this.offsetWidth <= mediaQueries.laptop && scrim.animate({ opacity: [0, 1] }, animateOptions)
-      element.animate(keyframes, animateOptions)
-    }
-    const close = (slot?: SlotName, folded?: boolean) => {
-      const element = getElement(slot)
-      const className = getClassName(folded)
-      if (!element.classList.contains(className)) return
-      const offset = getOffset(slot)
-      const animateOptions = getAnimateOptions()
-      const keyframes = { ...this.offsetWidth <= mediaQueries.laptop ? { transform: [`translateX(0)`, `translateX(${element.offsetWidth * offset}px)`] } : { width: [element.offsetWidth + 'px', '0px'] } }
-      element.style.display = 'block'
-      element.animate(keyframes, animateOptions).finished.then(() => element.style.removeProperty('display'))
-      this.offsetWidth <= mediaQueries.laptop && scrim.animate({ opacity: [1, 0] }, animateOptions)
-      element.classList.remove(className)
-      scrim.classList.remove(className)
-    }
-    const toggle = (slot?: SlotName, folded?: boolean) => {
-      const element = getElement(slot)
-      const className = getClassName(folded)
-      element.classList.contains(className) ? close(slot, folded) : show(slot, folded)
-    }
-    scrim.addEventListener('click', () => {
-      close('start', true)
-      close('end', true)
-    })
-    if (!supports.CSSContainer) {
-      new ResizeObserver(() => {
-        scrim.classList.toggle('s-laptop', this.offsetWidth <= mediaQueries.laptop)
-        slots.start.classList.toggle('s-laptop', this.offsetWidth <= mediaQueries.laptop)
-        slots.end.classList.toggle('s-laptop', this.offsetWidth <= mediaQueries.laptop)
-      }).observe(this)
-    }
-    return {
-      expose: { show, close, toggle }
-    }
-  }
-}) { }
+}) {
+}
 
 Drawer.define(name)
 
-export { Drawer }
+export {Drawer}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Drawer
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Drawer
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & Drawer
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & Drawer
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }

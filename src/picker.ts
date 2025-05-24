@@ -1,22 +1,22 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
-import { Popup } from './popup.js'
-import { Field } from './field.js'
-import { Select } from './core/utils/select.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
+import {Popup} from './popup.js'
+import {Field} from './field.js'
+import {Select} from './core/utils/select.js'
 import './ripple.js'
 import './scroll-view.js'
 
 type Props = {
-  disabled: boolean,
-  label: string,
-  value: string
+    disabled: boolean,
+    label: string,
+    value: string
 }
 
-const name = 's-picker'
+const name         = 's-picker'
 const props: Props = {
-  disabled: false,
-  label: '',
-  value: ''
+    disabled: false,
+    label   : '',
+    value   : ''
 }
 
 const style = /*css*/`
@@ -97,79 +97,80 @@ const template = /*html*/`
 `
 
 class Picker extends useElement({
-  style, template, props, syncProps: ['disabled'],
-  setup(shadowRoot) {
-    const popup = shadowRoot.querySelector<Popup>('.popup')!
-    const field = shadowRoot.querySelector<Field>('.field')!
-    const label = shadowRoot.querySelector<HTMLDivElement>('.label')!
-    const view = shadowRoot.querySelector<HTMLDivElement>('.view')!
-    const slot = shadowRoot.querySelector<HTMLSlotElement>('#slot')!
-    const container = shadowRoot.querySelector<HTMLDivElement>('.container')!
-    const select = new Select({ context: this, class: PickerItem, slot })
-    popup.addEventListener('show', () => {
-      field.focused = true
-      field.fixed = true
-      if (!select.select) {
-        view.textContent = this.label
-        view.style.opacity = '0'
-      }
-      container.style.minWidth = `${this.offsetWidth}px`
-      if (select.select) {
-        container.scrollTo({ top: (select.select.offsetTop - container.offsetTop) - (container.offsetHeight / 2 - select.select.offsetHeight / 2) })
-      }
-    })
-    popup.onclose = () => {
-      field.focused = false
-      !select.select && (field.fixed = false)
-    }
-    popup.addEventListener('closed', () => container.style.removeProperty('min-width'))
-    select.onUpdate = () => {
-      if (!select.select) {
-        field.fixed = false
-        view.textContent = ''
-        return
-      }
-      field.fixed = true
-      view.style.removeProperty('opacity')
-      view.textContent = select.select.textContent
-    }
-    select.onSelect = () => popup.close()
-    return {
-      expose: {
-        get options() {
-          return select.list
-        },
-        get selectedIndex() {
-          return select.selectedIndex
-        },
-        get show() {
-          return popup.show
-        },
-        get toggle() {
-          return popup.toggle
-        },
-        get close() {
-          return popup.close
+    style, template, props, syncProps: ['disabled'],
+    setup(shadowRoot) {
+        const popup     = shadowRoot.querySelector<Popup>('.popup')!
+        const field     = shadowRoot.querySelector<Field>('.field')!
+        const label     = shadowRoot.querySelector<HTMLDivElement>('.label')!
+        const view      = shadowRoot.querySelector<HTMLDivElement>('.view')!
+        const slot      = shadowRoot.querySelector<HTMLSlotElement>('#slot')!
+        const container = shadowRoot.querySelector<HTMLDivElement>('.container')!
+        const select    = new Select({context: this, class: PickerItem, slot})
+        popup.addEventListener('show', () => {
+            field.focused = true
+            field.fixed   = true
+            if (!select.select) {
+                view.textContent   = this.label
+                view.style.opacity = '0'
+            }
+            container.style.minWidth = `${this.offsetWidth}px`
+            if (select.select) {
+                container.scrollTo({top: (select.select.offsetTop - container.offsetTop) - (container.offsetHeight / 2 - select.select.offsetHeight / 2)})
+            }
+        })
+        popup.onclose = () => {
+            field.focused = false
+            !select.select && (field.fixed = false)
         }
-      },
-      label: (value) => label.textContent = value,
-      value: {
-        get: () => select.value,
-        set: (value) => select.value = value
-      }
+        popup.addEventListener('closed', () => container.style.removeProperty('min-width'))
+        select.onUpdate = () => {
+            if (!select.select) {
+                field.fixed      = false
+                view.textContent = ''
+                return
+            }
+            field.fixed = true
+            view.style.removeProperty('opacity')
+            view.textContent = select.select.textContent
+        }
+        select.onSelect = () => popup.close()
+        return {
+            expose: {
+                get options() {
+                    return select.list
+                },
+                get selectedIndex() {
+                    return select.selectedIndex
+                },
+                get show() {
+                    return popup.show
+                },
+                get toggle() {
+                    return popup.toggle
+                },
+                get close() {
+                    return popup.close
+                }
+            },
+            label : (value) => label.textContent = value,
+            value : {
+                get: () => select.value,
+                set: (value) => select.value = value
+            }
+        }
     }
-  }
-}) { }
-
-type ItemProps = {
-  selected: boolean,
-  value: string
+}) {
 }
 
-const itemName = 's-picker-item'
+type ItemProps = {
+    selected: boolean,
+    value: string
+}
+
+const itemName             = 's-picker-item'
 const itemProps: ItemProps = {
-  selected: false,
-  value: ''
+    selected: false,
+    value   : ''
 }
 
 const itemStyle = /*css*/`
@@ -227,99 +228,102 @@ const itemTemplate = /*html*/`
 `
 
 class PickerItem extends useElement({
-  style: itemStyle,
-  template: itemTemplate,
-  props: itemProps,
-  syncProps: ['selected'],
-  setup() {
-    this.addEventListener('click', () => {
-      if (this.selected) return
-      if (!(this.parentNode instanceof Picker)) return
-      this.dispatchEvent(new Event(`${name}:select`, { bubbles: true }))
-    })
-    return {
-      selected: () => {
-        if (!(this.parentNode instanceof Picker)) return
-        this.dispatchEvent(new Event(`${name}:update`, { bubbles: true }))
-      }
+    style    : itemStyle,
+    template : itemTemplate,
+    props    : itemProps,
+    syncProps: ['selected'],
+    setup() {
+        this.addEventListener('click', () => {
+            if (this.selected) return
+            if (!(this.parentNode instanceof Picker)) return
+            this.dispatchEvent(new Event(`${name}:select`, {bubbles: true}))
+        })
+        return {
+            selected: () => {
+                if (!(this.parentNode instanceof Picker)) return
+                this.dispatchEvent(new Event(`${name}:update`, {bubbles: true}))
+            }
+        }
     }
-  }
-}) { }
+}) {
+}
 
 Picker.define(name)
 PickerItem.define(itemName)
 
-export { Picker, PickerItem }
+export {Picker, PickerItem}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Picker
-    [itemName]: PickerItem
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-        //@ts-ignore
-        [itemName]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<ItemProps>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Picker
+        [itemName]: PickerItem
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+                //@ts-ignore
+                [itemName]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<ItemProps>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & Picker
-    [itemName]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<ItemProps>
-    } & PickerItem
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & Picker
+        [itemName]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<ItemProps>
+        } & PickerItem
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
-      //@ts-ignore
-      [itemName]: IntrinsicElements['div'] & Partial<ItemProps>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+            //@ts-ignore
+            [itemName]: IntrinsicElements['div'] & Partial<ItemProps>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
-      //@ts-ignore
-      [itemName]: JSX.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+            //@ts-ignore
+            [itemName]: JSX.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
-      //@ts-ignore
-      [itemName]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+            //@ts-ignore
+            [itemName]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+        }
     }
-  }
 }

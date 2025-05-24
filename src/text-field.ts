@@ -1,32 +1,32 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
-import { Field } from './field.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
+import {Field} from './field.js'
 
 type Props = {
-  label: string
-  placeholder: string
-  disabled: boolean
-  type: 'text' | 'number' | 'password' | 'multiline'
-  error: boolean
-  value: string
-  maxLength: number
-  readOnly: boolean
-  multiLine: boolean
-  countered: boolean
+    label: string
+    placeholder: string
+    disabled: boolean
+    type: 'text' | 'number' | 'password' | 'multiline'
+    error: boolean
+    value: string
+    maxLength: number
+    readOnly: boolean
+    multiLine: boolean
+    countered: boolean
 }
 
-const name = 's-text-field'
+const name         = 's-text-field'
 const props: Props = {
-  label: '',
-  placeholder: '',
-  disabled: false,
-  type: 'text',
-  error: false,
-  value: '',
-  maxLength: -1,
-  readOnly: false,
-  multiLine: false,
-  countered: false
+    label      : '',
+    placeholder: '',
+    disabled   : false,
+    type       : 'text',
+    error      : false,
+    value      : '',
+    maxLength  : -1,
+    readOnly   : false,
+    multiLine  : false,
+    countered  : false
 }
 
 const style = /*css*/`
@@ -275,163 +275,166 @@ const template = /*html*/`
 `
 
 class TextField extends useElement({
-  style, template, props, syncProps: ['type', 'disabled', 'error', 'multiLine', 'countered'],
-  setup(shadowRoot) {
-    const field = shadowRoot.querySelector<Field>('.field')!
-    const label = shadowRoot.querySelector<HTMLDivElement>('.label')!
-    const textAreaShadow = shadowRoot.querySelector<HTMLDivElement>('.shadow')!
-    const counter = shadowRoot.querySelector<HTMLDivElement>('.counter')!
-    const toggle = shadowRoot.querySelector<HTMLDivElement>('.toggle')!
-    const inputs = {
-      input: shadowRoot.querySelector('input')!,
-      textarea: shadowRoot.querySelector('textarea')!
-    }
-    const getInput = () => this.type === 'multiline' ? inputs.textarea : inputs.input
-    const onCounter = () => {
-      if (!this.countered) return
-      counter.textContent = `${getInput().value.length}/${this.maxLength}`
-    }
-    const onChange = () => this.dispatchEvent(new Event('change'))
-    const onFocus = () => {
-      field.fixed = true
-      field.focused = true
-    }
-    const onBlur = () => {
-      field.focused = false
-      if (getInput().value === '' && !this.error) field.fixed = false
-    }
-    inputs.input.oninput = onCounter
-    inputs.input.onfocus = onFocus
-    inputs.input.onblur = onBlur
-    inputs.input.onchange = onChange
-    inputs.textarea.onfocus = onFocus
-    inputs.textarea.onblur = onBlur
-    inputs.textarea.onchange = onChange
-    inputs.textarea.oninput = () => {
-      textAreaShadow.textContent = inputs.textarea.value
-      onCounter()
-    }
-    const setNumber = (num: number) => {
-      this.value = `${parseInt(this.value || '0') + num}`
-      this.dispatchEvent(new Event('input'))
-      this.dispatchEvent(new Event('change'))
-    }
-    shadowRoot.querySelector<HTMLDivElement>('.up')!.onclick = () => setNumber(1)
-    shadowRoot.querySelector<HTMLDivElement>('.down')!.onclick = () => setNumber(-1)
-    shadowRoot.querySelector<HTMLDivElement>('.visibility')!.onclick = () => {
-      inputs.input.type = toggle.classList.contains('show-password') ? 'password' : 'text'
-      toggle.classList.toggle('show-password')
-    }
-    return {
-      expose: {
-        get native() {
-          return getInput()
+    style, template, props, syncProps: ['type', 'disabled', 'error', 'multiLine', 'countered'],
+    setup(shadowRoot) {
+        const field                                                      = shadowRoot.querySelector<Field>('.field')!
+        const label                                                      = shadowRoot.querySelector<HTMLDivElement>('.label')!
+        const textAreaShadow                                             = shadowRoot.querySelector<HTMLDivElement>('.shadow')!
+        const counter                                                    = shadowRoot.querySelector<HTMLDivElement>('.counter')!
+        const toggle                                                     = shadowRoot.querySelector<HTMLDivElement>('.toggle')!
+        const inputs                                                     = {
+            input   : shadowRoot.querySelector('input')!,
+            textarea: shadowRoot.querySelector('textarea')!
         }
-      },
-      label: (value) => label.textContent = value,
-      type: (value, old) => {
-        inputs.input.type = value === 'password' ? (toggle.classList.contains('show-password') ? 'text' : 'password') : value
-        if (value === 'multiline') {
-          inputs.textarea.value = inputs.input.value
-          textAreaShadow.textContent = inputs.input.value
+        const getInput                                                   = () => this.type === 'multiline' ? inputs.textarea : inputs.input
+        const onCounter                                                  = () => {
+            if (!this.countered) return
+            counter.textContent = `${getInput().value.length}/${this.maxLength}`
         }
-        if (old === 'multiline') inputs.input.value = inputs.textarea.value
-      },
-      error: (value) => {
-        if (value) return field.fixed = true
-        if (getInput().value === '') field.fixed = false
-      },
-      value: {
-        get: () => getInput().value,
-        set: (value) => {
-          inputs.input.value = value
-          inputs.textarea.value = value
-          textAreaShadow.textContent = value
-          onCounter()
-          if (!this.error) field.fixed = value !== ''
+        const onChange                                                   = () => this.dispatchEvent(new Event('change'))
+        const onFocus                                                    = () => {
+            field.fixed   = true
+            field.focused = true
         }
-      },
-      placeholder: (value) => {
-        inputs.input.placeholder = value
-        inputs.textarea.placeholder = value
-      },
-      readOnly: (value) => {
-        inputs.input.readOnly = value
-        inputs.textarea.readOnly = value
-      },
-      disabled: (value) => {
-        inputs.input.disabled = value
-        inputs.textarea.disabled = value
-      },
-      maxLength: (value) => {
-        inputs.input.maxLength = value
-        inputs.textarea.maxLength = value
-        onCounter()
-      },
-      multiLine: (value) => this.type = value ? 'multiline' : 'text',
-      countered: onCounter
+        const onBlur                                                     = () => {
+            field.focused = false
+            if (getInput().value === '' && !this.error) field.fixed = false
+        }
+        inputs.input.oninput                                             = onCounter
+        inputs.input.onfocus                                             = onFocus
+        inputs.input.onblur                                              = onBlur
+        inputs.input.onchange                                            = onChange
+        inputs.textarea.onfocus                                          = onFocus
+        inputs.textarea.onblur                                           = onBlur
+        inputs.textarea.onchange                                         = onChange
+        inputs.textarea.oninput                                          = () => {
+            textAreaShadow.textContent = inputs.textarea.value
+            onCounter()
+        }
+        const setNumber                                                  = (num: number) => {
+            this.value = `${parseInt(this.value || '0') + num}`
+            this.dispatchEvent(new Event('input'))
+            this.dispatchEvent(new Event('change'))
+        }
+        shadowRoot.querySelector<HTMLDivElement>('.up')!.onclick         = () => setNumber(1)
+        shadowRoot.querySelector<HTMLDivElement>('.down')!.onclick       = () => setNumber(-1)
+        shadowRoot.querySelector<HTMLDivElement>('.visibility')!.onclick = () => {
+            inputs.input.type = toggle.classList.contains('show-password') ? 'password' : 'text'
+            toggle.classList.toggle('show-password')
+        }
+        return {
+            expose     : {
+                get native() {
+                    return getInput()
+                }
+            },
+            label      : (value) => label.textContent = value,
+            type       : (value, old) => {
+                inputs.input.type = value === 'password' ? (toggle.classList.contains('show-password') ? 'text' : 'password') : value
+                if (value === 'multiline') {
+                    inputs.textarea.value      = inputs.input.value
+                    textAreaShadow.textContent = inputs.input.value
+                }
+                if (old === 'multiline') inputs.input.value = inputs.textarea.value
+            },
+            error      : (value) => {
+                if (value) return field.fixed = true
+                if (getInput().value === '') field.fixed = false
+            },
+            value      : {
+                get: () => getInput().value,
+                set: (value) => {
+                    inputs.input.value         = value
+                    inputs.textarea.value      = value
+                    textAreaShadow.textContent = value
+                    onCounter()
+                    if (!this.error) field.fixed = value !== ''
+                }
+            },
+            placeholder: (value) => {
+                inputs.input.placeholder    = value
+                inputs.textarea.placeholder = value
+            },
+            readOnly   : (value) => {
+                inputs.input.readOnly    = value
+                inputs.textarea.readOnly = value
+            },
+            disabled   : (value) => {
+                inputs.input.disabled    = value
+                inputs.textarea.disabled = value
+            },
+            maxLength  : (value) => {
+                inputs.input.maxLength    = value
+                inputs.textarea.maxLength = value
+                onCounter()
+            },
+            multiLine  : (value) => this.type = value ? 'multiline' : 'text',
+            countered  : onCounter
+        }
     }
-  }
-}) { }
+}) {
+}
 
 TextField.define(name)
 
-export { TextField }
+export {TextField}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: TextField
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: TextField
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & TextField
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & TextField
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }

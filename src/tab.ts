@@ -1,18 +1,18 @@
-import { useElement } from './core/element.js'
-import { convertCSSDuration } from './core/utils/CSSUtils.js'
-import { Theme } from './core/theme.js'
-import { Select } from './core/utils/select.js'
+import {useElement} from './core/element.js'
+import {convertCSSDuration} from './core/utils/CSSUtils.js'
+import {Theme} from './core/theme.js'
+import {Select} from './core/utils/select.js'
 import './ripple.js'
 
 type Props = {
-  mode: 'scrollable' | 'fixed',
-  value: string
+    mode: 'scrollable' | 'fixed',
+    value: string
 }
 
-const name = 's-tab'
+const name         = 's-tab'
 const props: Props = {
-  mode: 'scrollable',
-  value: ''
+    mode : 'scrollable',
+    value: ''
 }
 
 const style = /*css*/`
@@ -63,61 +63,62 @@ const template = /*html*/`
 `
 
 class Tab extends useElement({
-  style, template, props, syncProps: ['mode'],
-  setup(shadowRoot) {
-    const slot = shadowRoot.querySelector<HTMLSlotElement>('slot')!
-    const container = shadowRoot.querySelector<HTMLDivElement>('.container')!
-    const select = new Select({ context: this, class: TabItem, slot })
-    const computedStyle = getComputedStyle(this)
-    const getAnimateOptions = () => {
-      const easing = computedStyle.getPropertyValue('--s-motion-easing-standard') || Theme.motionEasingStandard
-      const duration = computedStyle.getPropertyValue('--s-motion-duration-medium4') || Theme.motionDurationMedium4
-      return { easing: easing, duration: convertCSSDuration(duration) }
+    style, template, props, syncProps: ['mode'],
+    setup(shadowRoot) {
+        const slot              = shadowRoot.querySelector<HTMLSlotElement>('slot')!
+        const container         = shadowRoot.querySelector<HTMLDivElement>('.container')!
+        const select            = new Select({context: this, class: TabItem, slot})
+        const computedStyle     = getComputedStyle(this)
+        const getAnimateOptions = () => {
+            const easing   = computedStyle.getPropertyValue('--s-motion-easing-standard') || Theme.motionEasingStandard
+            const duration = computedStyle.getPropertyValue('--s-motion-duration-medium4') || Theme.motionDurationMedium4
+            return {easing: easing, duration: convertCSSDuration(duration)}
+        }
+        select.onUpdate         = (old) => {
+            if (select.select && container.scrollWidth !== container.offsetWidth) {
+                const left = (select.select.offsetLeft - container.offsetLeft) - (container.offsetWidth / 2 - select.select.offsetWidth / 2)
+                container.scrollTo({left, behavior: 'smooth'})
+            }
+            if (!old || !select.select || !this.isConnected) return
+            const oldRect             = old.shadowRoot!.querySelector('.indicator')!.getBoundingClientRect()
+            const indicator           = select.select.shadowRoot?.querySelector('.indicator') as HTMLDivElement
+            const rect                = indicator.getBoundingClientRect()
+            const offset              = oldRect.left - rect.left
+            indicator.style.transform = `translateX(${rect.left > oldRect.left ? offset : Math.abs(offset)}px)`
+            indicator.style.width     = `${oldRect.width}px`
+            const animation           = indicator.animate([{transform: `translateX(0)`, width: `${rect.width}px`}], getAnimateOptions())
+            animation.onfinish        = animation.oncancel = animation.onremove = () => {
+                indicator.style.removeProperty('transform')
+                indicator.style.removeProperty('width')
+            }
+        }
+        return {
+            expose: {
+                get options() {
+                    return select.list
+                },
+                get selectedIndex() {
+                    return select.selectedIndex
+                },
+            },
+            value : {
+                get: () => select.value,
+                set: (value) => select.value = value
+            }
+        }
     }
-    select.onUpdate = (old) => {
-      if (select.select && container.scrollWidth !== container.offsetWidth) {
-        const left = (select.select.offsetLeft - container.offsetLeft) - (container.offsetWidth / 2 - select.select.offsetWidth / 2)
-        container.scrollTo({ left, behavior: 'smooth' })
-      }
-      if (!old || !select.select || !this.isConnected) return
-      const oldRect = old.shadowRoot!.querySelector('.indicator')!.getBoundingClientRect()
-      const indicator = select.select.shadowRoot?.querySelector('.indicator') as HTMLDivElement
-      const rect = indicator.getBoundingClientRect()
-      const offset = oldRect.left - rect.left
-      indicator.style.transform = `translateX(${rect.left > oldRect.left ? offset : Math.abs(offset)}px)`
-      indicator.style.width = `${oldRect.width}px`
-      const animation = indicator.animate([{ transform: `translateX(0)`, width: `${rect.width}px` }], getAnimateOptions())
-      animation.onfinish = animation.oncancel = animation.onremove = () => {
-        indicator.style.removeProperty('transform')
-        indicator.style.removeProperty('width')
-      }
-    }
-    return {
-      expose: {
-        get options() {
-          return select.list
-        },
-        get selectedIndex() {
-          return select.selectedIndex
-        },
-      },
-      value: {
-        get: () => select.value,
-        set: (value) => select.value = value
-      }
-    }
-  }
-}) { }
-
-type ItemProps = {
-  selected: boolean,
-  value: string
+}) {
 }
 
-const itemName = 's-tab-item'
+type ItemProps = {
+    selected: boolean,
+    value: string
+}
+
+const itemName             = 's-tab-item'
 const itemProps: ItemProps = {
-  selected: false,
-  value: ''
+    selected: false,
+    value   : ''
 }
 
 const itemStyle = /*css*/`
@@ -206,104 +207,107 @@ const itemTemplate = /*html*/`
 `
 
 class TabItem extends useElement({
-  style: itemStyle,
-  template: itemTemplate,
-  props: itemProps,
-  syncProps: ['selected'],
-  setup(shadowRoot) {
-    const container = shadowRoot.querySelector<HTMLDivElement>('.container')!
-    shadowRoot.querySelector<HTMLSlotElement>('[name=icon]')!.addEventListener('slotchange', (event) => {
-      const slot = event.target as HTMLSlotElement
-      const length = slot.assignedElements().length
-      container.classList[length > 0 ? 'add' : 'remove']('icon')
-    })
-    this.addEventListener('click', () => {
-      if (!(this.parentNode instanceof Tab) || this.selected) return
-      this.dispatchEvent(new Event(`${name}:select`, { bubbles: true }))
-    })
-    return {
-      selected: () => {
-        if (!(this.parentNode instanceof Tab)) return
-        this.dispatchEvent(new Event(`${name}:update`, { bubbles: true }))
-      },
+    style    : itemStyle,
+    template : itemTemplate,
+    props    : itemProps,
+    syncProps: ['selected'],
+    setup(shadowRoot) {
+        const container = shadowRoot.querySelector<HTMLDivElement>('.container')!
+        shadowRoot.querySelector<HTMLSlotElement>('[name=icon]')!.addEventListener('slotchange', (event) => {
+            const slot   = event.target as HTMLSlotElement
+            const length = slot.assignedElements().length
+            container.classList[length > 0 ? 'add' : 'remove']('icon')
+        })
+        this.addEventListener('click', () => {
+            if (!(this.parentNode instanceof Tab) || this.selected) return
+            this.dispatchEvent(new Event(`${name}:select`, {bubbles: true}))
+        })
+        return {
+            selected: () => {
+                if (!(this.parentNode instanceof Tab)) return
+                this.dispatchEvent(new Event(`${name}:update`, {bubbles: true}))
+            },
+        }
     }
-  }
-}) { }
+}) {
+}
 
 Tab.define(name)
 TabItem.define(itemName)
 
-export { Tab, TabItem }
+export {Tab, TabItem}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Tab
-    [itemName]: TabItem
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-        //@ts-ignore
-        [itemName]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<ItemProps>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Tab
+        [itemName]: TabItem
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+                //@ts-ignore
+                [itemName]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<ItemProps>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & Tab
-    [itemName]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<ItemProps>
-    } & TabItem
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & Tab
+        [itemName]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<ItemProps>
+        } & TabItem
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
-      //@ts-ignore
-      [itemName]: IntrinsicElements['div'] & Partial<ItemProps>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+            //@ts-ignore
+            [itemName]: IntrinsicElements['div'] & Partial<ItemProps>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
-      //@ts-ignore
-      [itemName]: JSX.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+            //@ts-ignore
+            [itemName]: JSX.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
-      //@ts-ignore
-      [itemName]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+            //@ts-ignore
+            [itemName]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+        }
     }
-  }
 }

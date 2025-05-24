@@ -1,19 +1,19 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
 
 type Props = {
-  indeterminate: boolean
-  animated: boolean
-  max: number
-  value: number
+    indeterminate: boolean
+    animated: boolean
+    max: number
+    value: number
 }
 
-const name = 's-circular-progress'
+const name         = 's-circular-progress'
 const props: Props = {
-  indeterminate: false,
-  animated: false,
-  max: 100,
-  value: 0
+    indeterminate: false,
+    animated     : false,
+    max          : 100,
+    value        : 0
 }
 
 const style = /*css*/`
@@ -84,9 +84,9 @@ circle{
 }
 `
 
-const size = 48
+const size        = 48
 const borderWidth = 4
-const dasharray = (size - borderWidth) * Math.PI
+const dasharray   = (size - borderWidth) * Math.PI
 
 const template = /*html*/`
 <div class="container known">
@@ -103,83 +103,86 @@ const template = /*html*/`
 `
 
 class CircularProgress extends useElement({
-  style, template, props, syncProps: ['indeterminate', 'animated'],
-  setup(shadowRoot) {
-    const track = shadowRoot.querySelector<SVGCircleElement>('.known .track')!
-    const indicator = shadowRoot.querySelector<SVGCircleElement>('.known .indicator')!
-    const update = () => {
-      const percentage = Math.min(this.value, this.max) / this.max * 100
-      const value = dasharray - (dasharray * (percentage / 100))
-      const deg = percentage / 100 * 360
-      track.style.strokeDashoffset = `${percentage === 0 ? 0 : Math.min((dasharray + 16) - value, dasharray)}px`
-      track.setAttribute('transform', `rotate(${deg + 20}, ${size / 2}, ${size / 2})`)
-      indicator.style.strokeDashoffset = `${value}px`
+    style, template, props, syncProps: ['indeterminate', 'animated'],
+    setup(shadowRoot) {
+        const track     = shadowRoot.querySelector<SVGCircleElement>('.known .track')!
+        const indicator = shadowRoot.querySelector<SVGCircleElement>('.known .indicator')!
+        const update    = () => {
+            const percentage             = Math.min(this.value, this.max) / this.max * 100
+            const value                  = dasharray - (dasharray * (percentage / 100))
+            const deg                    = percentage / 100 * 360
+            track.style.strokeDashoffset = `${percentage === 0 ? 0 : Math.min((dasharray + 16) - value, dasharray)}px`
+            track.setAttribute('transform', `rotate(${deg + 20}, ${size / 2}, ${size / 2})`)
+            indicator.style.strokeDashoffset = `${value}px`
+        }
+        return {
+            max  : update,
+            value: update
+        }
     }
-    return {
-      max: update,
-      value: update
-    }
-  }
-}) { }
+}) {
+}
 
 CircularProgress.define(name)
 
-export { CircularProgress }
+export {CircularProgress}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: CircularProgress
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: CircularProgress
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & CircularProgress
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & CircularProgress
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }

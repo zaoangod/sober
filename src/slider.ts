@@ -1,24 +1,24 @@
-import { useElement } from './core/element.js'
-import { mediaQueryList } from './core/utils/mediaQuery.js'
-import { Theme } from './core/theme.js'
+import {useElement} from './core/element.js'
+import {mediaQueryList} from './core/utils/mediaQuery.js'
+import {Theme} from './core/theme.js'
 
 type Props = {
-  disabled: boolean
-  labeled: boolean
-  max: number
-  min: number
-  step: number
-  value: number
+    disabled: boolean
+    labeled: boolean
+    max: number
+    min: number
+    step: number
+    value: number
 }
 
-const name = 's-slider'
+const name         = 's-slider'
 const props: Props = {
-  disabled: false,
-  labeled: false,
-  max: 100,
-  min: 0,
-  step: 1,
-  value: 0
+    disabled: false,
+    labeled : false,
+    max     : 100,
+    min     : 0,
+    step    : 1,
+    value   : 0
 }
 
 const style = /*css*/`
@@ -157,111 +157,114 @@ const template = /*html*/`
 `
 
 class Slider extends useElement({
-  style, template, props, syncProps: ['disabled', 'labeled'],
-  setup(shadowRoot) {
-    const container = shadowRoot.querySelector<HTMLDivElement>('.container')!
-    const indicator = shadowRoot.querySelector<HTMLDivElement>('.indicator')!
-    const track = shadowRoot.querySelector<HTMLDivElement>('.track')!
-    const handle = shadowRoot.querySelector<HTMLDivElement>('.handle')!
-    const label = shadowRoot.querySelector<HTMLDivElement>('.label')!
-    const input = shadowRoot.querySelector<HTMLInputElement>('input')!
-    const update = () => {
-      const value = Number(input.value)
-      const percentage = ((value - this.min) * 100) / (this.max - this.min)
-      handle.style.left = `calc(${percentage}% - ${percentage * 0.16}px)`
-      indicator.style.width = `calc(${percentage}% - ${4 + (percentage * 0.16)}px)`
-      track.style.width = `calc(${100 - percentage}% - ${20 - (percentage * 0.16)}px)`
-      label.textContent = String(value)
+    style, template, props, syncProps: ['disabled', 'labeled'],
+    setup(shadowRoot) {
+        const container     = shadowRoot.querySelector<HTMLDivElement>('.container')!
+        const indicator     = shadowRoot.querySelector<HTMLDivElement>('.indicator')!
+        const track         = shadowRoot.querySelector<HTMLDivElement>('.track')!
+        const handle        = shadowRoot.querySelector<HTMLDivElement>('.handle')!
+        const label         = shadowRoot.querySelector<HTMLDivElement>('.label')!
+        const input         = shadowRoot.querySelector<HTMLInputElement>('input')!
+        const update        = () => {
+            const value           = Number(input.value)
+            const percentage      = ((value - this.min) * 100) / (this.max - this.min)
+            handle.style.left     = `calc(${percentage}% - ${percentage * 0.16}px)`
+            indicator.style.width = `calc(${percentage}% - ${4 + (percentage * 0.16)}px)`
+            track.style.width     = `calc(${100 - percentage}% - ${20 - (percentage * 0.16)}px)`
+            label.textContent     = String(value)
+        }
+        input.onchange      = () => this.dispatchEvent(new Event('change'))
+        input.oninput       = () => {
+            this.value = Number(input.value)
+            this.dispatchEvent(new Event('input'))
+        }
+        input.onmousedown   = (event) => event.button === 0 && mediaQueryList.pointerFine.matches && container.classList.add('active')
+        input.onmouseup     = () => mediaQueryList.pointerFine.matches && container.classList.remove('active')
+        input.ontouchstart  = () => mediaQueryList.pointerCoarse.matches && container.classList.add('active')
+        input.ontouchend    = () => mediaQueryList.pointerCoarse.matches && container.classList.remove('active')
+        input.ontouchcancel = () => mediaQueryList.pointerCoarse.matches && container.classList.remove('active')
+        return {
+            max  : (value) => {
+                input.max = String(value)
+                update()
+            },
+            min  : (value) => {
+                input.min = String(value)
+                update()
+            },
+            step : (value) => {
+                input.step = String(value)
+                update()
+            },
+            value: (value) => {
+                input.value = String(value)
+                update()
+            }
+        }
     }
-    input.onchange = () => this.dispatchEvent(new Event('change'))
-    input.oninput = () => {
-      this.value = Number(input.value)
-      this.dispatchEvent(new Event('input'))
-    }
-    input.onmousedown = (event) => event.button === 0 && mediaQueryList.pointerFine.matches && container.classList.add('active')
-    input.onmouseup = () => mediaQueryList.pointerFine.matches && container.classList.remove('active')
-    input.ontouchstart = () => mediaQueryList.pointerCoarse.matches && container.classList.add('active')
-    input.ontouchend = () => mediaQueryList.pointerCoarse.matches && container.classList.remove('active')
-    input.ontouchcancel = () => mediaQueryList.pointerCoarse.matches && container.classList.remove('active')
-    return {
-      max: (value) => {
-        input.max = String(value)
-        update()
-      },
-      min: (value) => {
-        input.min = String(value)
-        update()
-      },
-      step: (value) => {
-        input.step = String(value)
-        update()
-      },
-      value: (value) => {
-        input.value = String(value)
-        update()
-      }
-    }
-  }
-}) { }
+}) {
+}
 
 Slider.define(name)
 
-export { Slider }
+export {Slider}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Slider
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Slider
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & Slider
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & Slider
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }

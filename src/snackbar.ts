@@ -1,20 +1,20 @@
-import { useElement } from './core/element.js'
-import { getStackingContext } from './core/utils/getStackingContext.js'
-import { mediaQueries, mediaQueryList } from './core/utils/mediaQuery.js'
-import { convertCSSDuration } from './core/utils/CSSUtils.js'
-import { Theme } from './core/theme.js'
+import {useElement} from './core/element.js'
+import {getStackingContext} from './core/utils/getStackingContext.js'
+import {mediaQueries, mediaQueryList} from './core/utils/mediaQuery.js'
+import {convertCSSDuration} from './core/utils/CSSUtils.js'
+import {Theme} from './core/theme.js'
 
 type Props = {
-  type: 'none' | 'info' | 'success' | 'warning' | 'error'
-  align: 'auto' | 'top' | 'bottom'
-  duration: number
+    type: 'none' | 'info' | 'success' | 'warning' | 'error'
+    align: 'auto' | 'top' | 'bottom'
+    duration: number
 }
 
-const name = 's-snackbar'
+const name         = 's-snackbar'
 const props: Props = {
-  type: 'none',
-  align: 'auto',
-  duration: 4000
+    type    : 'none',
+    align   : 'auto',
+    duration: 4000
 }
 
 const style = /*css*/`
@@ -160,217 +160,219 @@ const template = /*html*/`
 `
 
 const builder = (options: string | {
-  root?: Element
-  icon?: string | Element
-  text: string
-  type?: Props['type']
-  align?: Props['align']
-  duration?: number
-  action?: string | {
+    root?: Element
+    icon?: string | Element
     text: string
-    click: (event: MouseEvent) => unknown
-  }
+    type?: Props['type']
+    align?: Props['align']
+    duration?: number
+    action?: string | {
+        text: string
+        click: (event: MouseEvent) => unknown
+    }
 }) => {
-  let root: Element = document.body
-  const snackbar = new Snackbar()
-  snackbar.style.display = 'block'
-  const page = document.body.firstElementChild
-  if (page && page.tagName === 'S-PAGE') {
-    root = page
-  }
-  if (typeof options === 'string') {
-    snackbar.textContent = options
-  } else {
-    if (options.root) root = options.root
-    if (options.align) snackbar.align = options.align
-    if (options.icon) {
-      if (options.icon instanceof Element) {
-        options.icon.slot = 'icon'
-        snackbar.appendChild(options.icon)
-      }
-      if (typeof options.icon === 'string') {
-        snackbar.innerHTML = options.icon
-      }
+    let root: Element      = document.body
+    const snackbar         = new Snackbar()
+    snackbar.style.display = 'block'
+    const page             = document.body.firstElementChild
+    if (page && page.tagName === 'S-PAGE') {
+        root = page
     }
-    snackbar.append(options.text)
-    if (options.type) snackbar.type = options.type
-    if (options.action) {
-      const action = document.createElement('s-button')
-      action.type = 'text'
-      action.slot = 'action'
-      if (typeof options.action === 'string') {
-        action.textContent = options.action
-      } else {
-        action.textContent = options.action.text
-        action.addEventListener('click', options.action.click)
-      }
-      snackbar.appendChild(action)
+    if (typeof options === 'string') {
+        snackbar.textContent = options
+    } else {
+        if (options.root) root = options.root
+        if (options.align) snackbar.align = options.align
+        if (options.icon) {
+            if (options.icon instanceof Element) {
+                options.icon.slot = 'icon'
+                snackbar.appendChild(options.icon)
+            }
+            if (typeof options.icon === 'string') {
+                snackbar.innerHTML = options.icon
+            }
+        }
+        snackbar.append(options.text)
+        if (options.type) snackbar.type = options.type
+        if (options.action) {
+            const action = document.createElement('s-button')
+            action.type  = 'text'
+            action.slot  = 'action'
+            if (typeof options.action === 'string') {
+                action.textContent = options.action
+            } else {
+                action.textContent = options.action.text
+                action.addEventListener('click', options.action.click)
+            }
+            snackbar.appendChild(action)
+        }
+        if (typeof options.duration === 'number') snackbar.duration = options.duration
     }
-    if (typeof options.duration === 'number') snackbar.duration = options.duration
-  }
-  root.appendChild(snackbar)
-  snackbar.addEventListener('closed', () => root.removeChild(snackbar))
-  snackbar.show()
-  return snackbar
+    root.appendChild(snackbar)
+    snackbar.addEventListener('closed', () => root.removeChild(snackbar))
+    snackbar.show()
+    return snackbar
 }
 
 const tasks = {
-  top: [] as HTMLElement[],
-  bottom: [] as HTMLElement[],
+    top   : [] as HTMLElement[],
+    bottom: [] as HTMLElement[],
 }
 
 class Snackbar extends useElement({
-  style, template, props, syncProps: ['type'],
-  setup(shadowRoot) {
-    const popup = shadowRoot.querySelector<HTMLDivElement>('.popup')!
-    const container = shadowRoot.querySelector<HTMLDivElement>('.container')!
-    const computedStyle = getComputedStyle(this)
-    const getAnimateOptions = () => {
-      const easing = computedStyle.getPropertyValue('--s-motion-easing-standard') || Theme.motionEasingStandard
-      const duration = computedStyle.getPropertyValue('--s-motion-duration-medium4') || Theme.motionDurationMedium4
-      return { easing: easing, duration: convertCSSDuration(duration) }
+    style, template, props, syncProps: ['type'],
+    setup(shadowRoot) {
+        const popup                                                              = shadowRoot.querySelector<HTMLDivElement>('.popup')!
+        const container                                                          = shadowRoot.querySelector<HTMLDivElement>('.container')!
+        const computedStyle                                                      = getComputedStyle(this)
+        const getAnimateOptions                                                  = () => {
+            const easing   = computedStyle.getPropertyValue('--s-motion-easing-standard') || Theme.motionEasingStandard
+            const duration = computedStyle.getPropertyValue('--s-motion-duration-medium4') || Theme.motionDurationMedium4
+            return {easing: easing, duration: convertCSSDuration(duration)}
+        }
+        const state                                                              = {timer: 0, gap: 8}
+        const getAlign                                                           = () => this.align === 'auto' ? (mediaQueryList.pointerCoarse.matches ? 'top' : 'bottom') : this.align
+        const show                                                               = () => {
+            if (!this.isConnected || popup.classList.contains('show')) return
+            popup.classList.add('show')
+            if (popup.showPopover) {
+                popup.showPopover()
+            } else {
+                const rect             = getStackingContext(shadowRoot)
+                popup.style.width      = `${innerWidth}px`
+                popup.style.height     = `${innerHeight}px`
+                popup.style.marginLeft = `${-rect.left}px`
+                popup.style.marginTop  = `${-rect.top}px`
+                popup.style.zIndex     = '3'
+            }
+            const align               = getAlign()
+            container.style.alignSelf = {top: 'flex-start', bottom: 'flex-end'}[align]
+            const task                = tasks[align]
+            const offset              = {top: 1, bottom: -1}[align]
+            let height                = container.offsetHeight + state.gap
+            for (const item of task) {
+                item.style.transform = `translateY(${height * offset}px)`
+                height += (item.firstElementChild as HTMLElement).offsetHeight + state.gap
+            }
+            const animation = container.animate({opacity: [0, 1], transform: [`translateY(calc(${offset * -100}% + 16px))`, ''], pointerEvents: 'auto'}, {...getAnimateOptions(), fill: 'forwards'})
+            this.dispatchEvent(new Event('show'))
+            this.duration > 0 && (state.timer = setTimeout(close, this.duration))
+            popup.dataset.align = align
+            task.unshift(popup)
+            animation.finished.then(() => this.dispatchEvent(new Event('showed')))
+        }
+        const close                                                              = () => {
+            if (!this.isConnected || !popup.classList.contains('show')) return
+            clearTimeout(state.timer)
+            const align   = popup.dataset.align as 'top' | 'bottom'
+            const task    = tasks[align]
+            const offset  = {top: 1, bottom: -1}[align]
+            const indexOf = task.indexOf(popup)
+            for (let i = indexOf + 1; i < task.length; i++) {
+                const item           = task[i]
+                const h              = Math.abs(Number(item.style.transform.slice(11).slice(0, -3)))
+                item.style.transform = `translateY(${(h - container.offsetHeight - state.gap) * offset}px)`
+            }
+            const animation = container.animate({opacity: [1, 0], transform: `translateY(calc(${offset * -100}% + 16px))`}, getAnimateOptions())
+            this.dispatchEvent(new Event('close'))
+            animation.finished.then(() => {
+                if (popup.hidePopover) popup.hidePopover()
+                popup.removeAttribute('style')
+                popup.classList.remove('show')
+                this.dispatchEvent(new Event('closed'))
+            })
+            task.splice(indexOf, 1)
+        }
+        container.onmouseenter                                                   = () => clearTimeout(state.timer)
+        container.onmouseleave                                                   = () => popup.classList.contains('show') && this.duration > 0 && (state.timer = setTimeout(close, this.duration))
+        shadowRoot.querySelector<HTMLSlotElement>('slot[name=trigger]')!.onclick = show
+        shadowRoot.querySelector<HTMLSlotElement>('slot[name=action]')!.onclick  = close
+        return {
+            expose: {show, close},
+        }
     }
-    const state = { timer: 0, gap: 8 }
-    const getAlign = () => this.align === 'auto' ? (mediaQueryList.pointerCoarse.matches ? 'top' : 'bottom') : this.align
-    const show = () => {
-      if (!this.isConnected || popup.classList.contains('show')) return
-      popup.classList.add('show')
-      if (popup.showPopover) {
-        popup.showPopover()
-      } else {
-        const rect = getStackingContext(shadowRoot)
-        popup.style.width = `${innerWidth}px`
-        popup.style.height = `${innerHeight}px`
-        popup.style.marginLeft = `${-rect.left}px`
-        popup.style.marginTop = `${-rect.top}px`
-        popup.style.zIndex = '3'
-      }
-      const align = getAlign()
-      container.style.alignSelf = { top: 'flex-start', bottom: 'flex-end' }[align]
-      const task = tasks[align]
-      const offset = { top: 1, bottom: -1 }[align]
-      let height = container.offsetHeight + state.gap
-      for (const item of task) {
-        item.style.transform = `translateY(${height * offset}px)`
-        height += (item.firstElementChild as HTMLElement).offsetHeight + state.gap
-      }
-      const animation = container.animate({ opacity: [0, 1], transform: [`translateY(calc(${offset * -100}% + 16px))`, ''], pointerEvents: 'auto' }, { ...getAnimateOptions(), fill: 'forwards' })
-      this.dispatchEvent(new Event('show'))
-      this.duration > 0 && (state.timer = setTimeout(close, this.duration))
-      popup.dataset.align = align
-      task.unshift(popup)
-      animation.finished.then(() => this.dispatchEvent(new Event('showed')))
-    }
-    const close = () => {
-      if (!this.isConnected || !popup.classList.contains('show')) return
-      clearTimeout(state.timer)
-      const align = popup.dataset.align as 'top' | 'bottom'
-      const task = tasks[align]
-      const offset = { top: 1, bottom: -1 }[align]
-      const indexOf = task.indexOf(popup)
-      for (let i = indexOf + 1; i < task.length; i++) {
-        const item = task[i]
-        const h = Math.abs(Number(item.style.transform.slice(11).slice(0, -3)))
-        item.style.transform = `translateY(${(h - container.offsetHeight - state.gap) * offset}px)`
-      }
-      const animation = container.animate({ opacity: [1, 0], transform: `translateY(calc(${offset * -100}% + 16px))` }, getAnimateOptions())
-      this.dispatchEvent(new Event('close'))
-      animation.finished.then(() => {
-        if (popup.hidePopover) popup.hidePopover()
-        popup.removeAttribute('style')
-        popup.classList.remove('show')
-        this.dispatchEvent(new Event('closed'))
-      })
-      task.splice(indexOf, 1)
-    }
-    container.onmouseenter = () => clearTimeout(state.timer)
-    container.onmouseleave = () => popup.classList.contains('show') && this.duration > 0 && (state.timer = setTimeout(close, this.duration))
-    shadowRoot.querySelector<HTMLSlotElement>('slot[name=trigger]')!.onclick = show
-    shadowRoot.querySelector<HTMLSlotElement>('slot[name=action]')!.onclick = close
-    return {
-      expose: { show, close },
-    }
-  }
 }) {
-  static readonly builder = builder
+    static readonly builder = builder
 }
 
 Snackbar.define(name)
 
-export { Snackbar }
+export {Snackbar}
 
 interface Events {
-  Show: Event
-  Showed: Event
-  Closed: Event
+    Show: Event
+    Showed: Event
+    Closed: Event
 }
-
 
 type EventMaps = Events & HTMLElementEventMap
 
 interface Snackbar {
-  addEventListener<K extends keyof EventMaps>(type: Lowercase<K>, listener: (this: Snackbar, ev: EventMaps[K]) => any, options?: boolean | AddEventListenerOptions): void
-  removeEventListener<K extends keyof EventMaps>(type: Lowercase<K>, listener: (this: Snackbar, ev: EventMaps[K]) => any, options?: boolean | EventListenerOptions): void
+    addEventListener<K extends keyof EventMaps>(type: Lowercase<K>, listener: (this: Snackbar, ev: EventMaps[K]) => any, options?: boolean | AddEventListenerOptions): void
+
+    removeEventListener<K extends keyof EventMaps>(type: Lowercase<K>, listener: (this: Snackbar, ev: EventMaps[K]) => any, options?: boolean | EventListenerOptions): void
 }
 
 type JSXEvents<L extends boolean = false> = {
-  [K in keyof EventMaps as `on${L extends false ? K : Lowercase<K>}`]?: (ev: EventMaps[K]) => void
+    [K in keyof EventMaps as `on${L extends false ? K : Lowercase<K>}`]?: (ev: EventMaps[K]) => void
 }
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Snackbar
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props> & Events<true>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Snackbar
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props> & Events<true>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props> & JSXEvents
-    } & Snackbar
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props> & JSXEvents
+        } & Snackbar
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props> & JSXEvents
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props> & JSXEvents
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props> & Events<true>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props> & Events<true>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props> & Events<true>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props> & Events<true>
+        }
     }
-  }
 }

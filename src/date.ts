@@ -1,43 +1,43 @@
-import { useElement } from './core/element.js'
-import { dateFormat } from './core/utils/dateFormat.js'
-import { Theme } from './core/theme.js'
-import { Ripple } from './ripple.js'
-import { ScrollView } from './scroll-view.js'
-import { I18n } from './core/i18n.js'
+import {useElement} from './core/element.js'
+import {dateFormat} from './core/utils/dateFormat.js'
+import {Theme} from './core/theme.js'
+import {Ripple} from './ripple.js'
+import {ScrollView} from './scroll-view.js'
+import {I18n} from './core/i18n.js'
 
 type Locale = {
-  display: (date: Date) => string
-  displayMonth: (date: Date) => string
-  displayWeeks: string[]
+    display: (date: Date) => string
+    displayMonth: (date: Date) => string
+    displayWeeks: string[]
 }
 
 const i18n = new I18n<Locale>({})
-i18n.list = {
-  zh: {
-    display: (date) => `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 星期${i18n.list.zh.displayWeeks[date.getDay()]}`,
-    displayMonth: (date) => `${date.getFullYear()}年`,
-    displayWeeks: ['日', '一', '二', '三', '四', '五', '六']
-  },
-  en: {
-    display: (date) => `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]}, Jan ${date.getDate()}`,
-    displayMonth: (date) => `${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][date.getMonth()]} ${date.getFullYear()}`,
-    displayWeeks: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-  }
+i18n.list  = {
+    zh: {
+        display     : (date) => `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 星期${i18n.list.zh.displayWeeks[date.getDay()]}`,
+        displayMonth: (date) => `${date.getFullYear()}年`,
+        displayWeeks: ['日', '一', '二', '三', '四', '五', '六']
+    },
+    en: {
+        display     : (date) => `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]}, Jan ${date.getDate()}`,
+        displayMonth: (date) => `${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][date.getMonth()]} ${date.getFullYear()}`,
+        displayWeeks: ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+    }
 }
 
 type Props = {
-  value: string
-  locale: string
-  max: string,
-  min: string
+    value: string
+    locale: string
+    max: string,
+    min: string
 }
 
-const name = 's-date'
+const name         = 's-date'
 const props: Props = {
-  value: '',
-  locale: '',
-  max: '2099-12-31',
-  min: '1900-01-01',
+    value : '',
+    locale: '',
+    max   : '2099-12-31',
+    min   : '1900-01-01',
 }
 
 const style = /*css*/`
@@ -155,15 +155,15 @@ svg{
 `
 
 const templateList = {
-  years: [] as string[],
-  weeks: [] as string[],
-  days: [] as string[],
+    years: [] as string[],
+    weeks: [] as string[],
+    days : [] as string[],
 }
 
 for (let i = 0; i < 200; i++) {
-  if (i < 7) templateList.weeks.push(`<div class="item"></div>`)
-  if (i < 31) templateList.days.push(`<div class="item"><s-ripple class="icon-button">${i + 1}</s-ripple></div>`)
-  templateList.years.push(`<s-ripple class="button item"></s-ripple>`)
+    if (i < 7) templateList.weeks.push(`<div class="item"></div>`)
+    if (i < 31) templateList.days.push(`<div class="item"><s-ripple class="icon-button">${i + 1}</s-ripple></div>`)
+    templateList.years.push(`<s-ripple class="button item"></s-ripple>`)
 }
 
 const template = /*html*/`
@@ -199,210 +199,214 @@ const template = /*html*/`
 `
 
 class DateState {
-  yearSelect?: HTMLElement
-  daySelect?: HTMLElement
-  dayOverflow?: HTMLElement
-  date: Date
-  min: Date
-  max: Date
-  constructor(date: Date | string, min: string, max: string) {
-    this.date = typeof date === 'string' ? new Date(date) : date
-    this.min = new Date(min)
-    this.max = new Date(max)
-  }
+    yearSelect?: HTMLElement
+    daySelect?: HTMLElement
+    dayOverflow?: HTMLElement
+    date: Date
+    min: Date
+    max: Date
+
+    constructor(date: Date | string, min: string, max: string) {
+        this.date = typeof date === 'string' ? new Date(date) : date
+        this.min  = new Date(min)
+        this.max  = new Date(max)
+    }
 }
 
 const getMonthMaxDate = (year: number, month: number) => {
-  const date = new Date(year, month + 1, 1)
-  date.setDate(date.getDate() - 1)
-  return date.getDate()
+    const date = new Date(year, month + 1, 1)
+    date.setDate(date.getDate() - 1)
+    return date.getDate()
 }
 
 class DateElement extends useElement({
-  style, template, props,
-  setup(shadowRoot) {
-    const container = shadowRoot.querySelector<HTMLDivElement>('.container')!
-    const headline = shadowRoot.querySelector<HTMLDivElement>('.header>span')!
-    const yearTogggle = shadowRoot.querySelector<Ripple>('.action>.year')!
-    const prev = shadowRoot.querySelector<Ripple>('.action>.toggle>.prev')!
-    const next = shadowRoot.querySelector<Ripple>('.action>.toggle>.next')!
-    const years = shadowRoot.querySelector<ScrollView>('.years')!
-    const weeks = shadowRoot.querySelector<HTMLDivElement>('.weeks')!
-    const days = shadowRoot.querySelector<HTMLDivElement>('.days')!
-    const state = new DateState(this.value || new Date(), this.min, this.max)
-    const setText = () => {
-      const displayHeadline = i18n.getItem(this.locale).display
-      headline.textContent = displayHeadline(state.date)
-      const displayMotnh = i18n.getItem(this.locale).displayMonth
-      yearTogggle.children[0].textContent = displayMotnh(state.date)
-    }
-    const setWeekText = () => {
-      const displayWeeks = i18n.getItem(this.locale).displayWeeks
-      weeks.childNodes.forEach((item, index) => item.textContent = displayWeeks[index])
-    }
-    const update = () => {
-      const weekDay = new Date(state.date.getFullYear(), state.date.getMonth(), 1).getDay()
-      days.children[0].setAttribute('style', `margin-left: calc((100% / 7) * ${weekDay})`)
-      const monthDay = new Date(state.date.getFullYear(), state.date.getMonth() + 1, 0).getDate()
-      state.dayOverflow?.classList.remove('overflow')
-      state.dayOverflow = days.children[monthDay - 1] as HTMLElement
-      state.dayOverflow.classList.add('overflow')
-      state.yearSelect?.classList.remove('checked')
-      state.yearSelect = years.children[state.date.getFullYear() - state.min.getFullYear()] as HTMLElement
-      state.yearSelect.classList.add('checked')
-      state.daySelect?.classList.remove('checked')
-      state.daySelect = days.children[state.date.getDate() - 1] as HTMLElement
-      state.daySelect.classList.add('checked')
-      container.style.removeProperty('height')
-    }
-    const setYearCount = () => {
-      const count = state.max.getFullYear() - state.min.getFullYear()
-      years.innerHTML = ''
-      years.style.counterReset = `year-counter ${state.min.getFullYear() - 1}`
-      const fragment = document.createDocumentFragment()
-      for (let i = 0; i <= count; i++) {
-        const ripple = new Ripple()
-        ripple.classList.add('button', 'item')
-        fragment.appendChild(ripple)
-      }
-      years.appendChild(fragment)
-      update()
-    }
-    const setValue = (y: number, m: number, d: number) => {
-      this.value = dateFormat(new Date(y, m, d))
-      this.dispatchEvent(new Event('change'))
-    }
-    yearTogggle.onclick = () => {
-      const h = container.offsetHeight
-      container.classList.toggle('show-years')
-      if (container.classList.contains('show-years')) {
-        container.style.height = `${h}px`
-        state.yearSelect && years.scrollTo({ top: state.yearSelect.offsetTop - (years.offsetHeight / 2) + (state.yearSelect.offsetHeight / 2) })
-        return
-      }
-    }
-    prev.onclick = () => {
-      const prevMaxDate = getMonthMaxDate(state.date.getFullYear(), state.date.getMonth() - 1)
-      const day = Math.min(state.date.getDate(), prevMaxDate)
-      setValue(state.date.getFullYear(), state.date.getMonth() - 1, day)
-    }
-    next.onclick = () => {
-      const prevMaxDate = getMonthMaxDate(state.date.getFullYear(), state.date.getMonth() + 1)
-      const day = Math.min(state.date.getDate(), prevMaxDate)
-      setValue(state.date.getFullYear(), state.date.getMonth() + 1, day)
-    }
-    years.onclick = (e) => {
-      if (!(e.target instanceof Ripple)) return
-      container.classList.remove('show-years')
-      const index = Array.from(years.children).indexOf(e.target) + state.min.getFullYear()
-      setValue(index, state.date.getMonth(), state.date.getDate())
-    }
-    days.onclick = (e) => {
-      if (!(e.target instanceof Ripple)) return
-      const index = Array.from(days.children).indexOf(e.target.parentElement!) + 1
-      setValue(state.date.getFullYear(), state.date.getMonth(), index)
-    }
-    const updateText = () => {
-      setText()
-      setWeekText()
-    }
-    update()
-    updateText()
-    return {
-      onMounted: () => i18n.updates.set(this, updateText),
-      onUnmounted: () => i18n.updates.delete(this),
-      min: (value) => {
-        const min = new Date(value)
-        if (isNaN(min.getTime()) || min.getTime() > state.date.getTime()) throw Error('invalid min date')
-        state.min = min
-        setYearCount()
-      },
-      max: (value) => {
-        const max = new Date(value)
-        if (isNaN(max.getTime()) || max.getTime() < state.date.getTime()) throw Error('invalid max date')
-        state.max = max
-        setYearCount()
-      },
-      value: {
-        get: () => dateFormat(state.date),
-        set: (value) => {
-          const val = new Date(value)
-          if (isNaN(val.getTime()) || val.getTime() < state.min.getTime() || val.getTime() > state.max.getTime()) throw Error('invalid date')
-          state.date = val
-          setText()
-          update()
+    style, template, props,
+    setup(shadowRoot) {
+        const container     = shadowRoot.querySelector<HTMLDivElement>('.container')!
+        const headline      = shadowRoot.querySelector<HTMLDivElement>('.header>span')!
+        const yearTogggle   = shadowRoot.querySelector<Ripple>('.action>.year')!
+        const prev          = shadowRoot.querySelector<Ripple>('.action>.toggle>.prev')!
+        const next          = shadowRoot.querySelector<Ripple>('.action>.toggle>.next')!
+        const years         = shadowRoot.querySelector<ScrollView>('.years')!
+        const weeks         = shadowRoot.querySelector<HTMLDivElement>('.weeks')!
+        const days          = shadowRoot.querySelector<HTMLDivElement>('.days')!
+        const state         = new DateState(this.value || new Date(), this.min, this.max)
+        const setText       = () => {
+            const displayHeadline               = i18n.getItem(this.locale).display
+            headline.textContent                = displayHeadline(state.date)
+            const displayMotnh                  = i18n.getItem(this.locale).displayMonth
+            yearTogggle.children[0].textContent = displayMotnh(state.date)
         }
-      },
-      locale: updateText,
+        const setWeekText   = () => {
+            const displayWeeks = i18n.getItem(this.locale).displayWeeks
+            weeks.childNodes.forEach((item, index) => item.textContent = displayWeeks[index])
+        }
+        const update        = () => {
+            const weekDay = new Date(state.date.getFullYear(), state.date.getMonth(), 1).getDay()
+            days.children[0].setAttribute('style', `margin-left: calc((100% / 7) * ${weekDay})`)
+            const monthDay = new Date(state.date.getFullYear(), state.date.getMonth() + 1, 0).getDate()
+            state.dayOverflow?.classList.remove('overflow')
+            state.dayOverflow = days.children[monthDay - 1] as HTMLElement
+            state.dayOverflow.classList.add('overflow')
+            state.yearSelect?.classList.remove('checked')
+            state.yearSelect = years.children[state.date.getFullYear() - state.min.getFullYear()] as HTMLElement
+            state.yearSelect.classList.add('checked')
+            state.daySelect?.classList.remove('checked')
+            state.daySelect = days.children[state.date.getDate() - 1] as HTMLElement
+            state.daySelect.classList.add('checked')
+            container.style.removeProperty('height')
+        }
+        const setYearCount  = () => {
+            const count              = state.max.getFullYear() - state.min.getFullYear()
+            years.innerHTML          = ''
+            years.style.counterReset = `year-counter ${state.min.getFullYear() - 1}`
+            const fragment           = document.createDocumentFragment()
+            for (let i = 0; i <= count; i++) {
+                const ripple = new Ripple()
+                ripple.classList.add('button', 'item')
+                fragment.appendChild(ripple)
+            }
+            years.appendChild(fragment)
+            update()
+        }
+        const setValue      = (y: number, m: number, d: number) => {
+            this.value = dateFormat(new Date(y, m, d))
+            this.dispatchEvent(new Event('change'))
+        }
+        yearTogggle.onclick = () => {
+            const h = container.offsetHeight
+            container.classList.toggle('show-years')
+            if (container.classList.contains('show-years')) {
+                container.style.height = `${h}px`
+                state.yearSelect && years.scrollTo({top: state.yearSelect.offsetTop - (years.offsetHeight / 2) + (state.yearSelect.offsetHeight / 2)})
+                return
+            }
+        }
+        prev.onclick        = () => {
+            const prevMaxDate = getMonthMaxDate(state.date.getFullYear(), state.date.getMonth() - 1)
+            const day         = Math.min(state.date.getDate(), prevMaxDate)
+            setValue(state.date.getFullYear(), state.date.getMonth() - 1, day)
+        }
+        next.onclick        = () => {
+            const prevMaxDate = getMonthMaxDate(state.date.getFullYear(), state.date.getMonth() + 1)
+            const day         = Math.min(state.date.getDate(), prevMaxDate)
+            setValue(state.date.getFullYear(), state.date.getMonth() + 1, day)
+        }
+        years.onclick       = (e) => {
+            if (!(e.target instanceof Ripple)) return
+            container.classList.remove('show-years')
+            const index = Array.from(years.children).indexOf(e.target) + state.min.getFullYear()
+            setValue(index, state.date.getMonth(), state.date.getDate())
+        }
+        days.onclick        = (e) => {
+            if (!(e.target instanceof Ripple)) return
+            const index = Array.from(days.children).indexOf(e.target.parentElement!) + 1
+            setValue(state.date.getFullYear(), state.date.getMonth(), index)
+        }
+        const updateText    = () => {
+            setText()
+            setWeekText()
+        }
+        update()
+        updateText()
+        return {
+            onMounted  : () => i18n.updates.set(this, updateText),
+            onUnmounted: () => i18n.updates.delete(this),
+            min        : (value) => {
+                const min = new Date(value)
+                if (isNaN(min.getTime()) || min.getTime() > state.date.getTime()) throw Error('invalid min date')
+                state.min = min
+                setYearCount()
+            },
+            max        : (value) => {
+                const max = new Date(value)
+                if (isNaN(max.getTime()) || max.getTime() < state.date.getTime()) throw Error('invalid max date')
+                state.max = max
+                setYearCount()
+            },
+            value      : {
+                get: () => dateFormat(state.date),
+                set: (value) => {
+                    const val = new Date(value)
+                    if (isNaN(val.getTime()) || val.getTime() < state.min.getTime() || val.getTime() > state.max.getTime()) throw Error('invalid date')
+                    state.date = val
+                    setText()
+                    update()
+                }
+            },
+            locale     : updateText,
+        }
     }
-  }
 }) {
-  static addLocale(name: string, locale: Locale) {
-    i18n.addItem(name, locale)
-  }
-  static setLocale(name?: string) {
-    i18n.setLocale(name)
-  }
+    static addLocale(name: string, locale: Locale) {
+        i18n.addItem(name, locale)
+    }
+
+    static setLocale(name?: string) {
+        i18n.setLocale(name)
+    }
 }
 
 DateElement.define(name)
 
-export { DateElement as Date }
+export {DateElement as Date}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: DateElement
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: DateElement
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & DateElement
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & DateElement
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props> & Events<true>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props> & Events<true>
+        }
     }
-  }
 }

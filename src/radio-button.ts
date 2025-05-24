@@ -1,20 +1,20 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
 import './ripple.js'
 
 type Props = {
-  disabled: boolean,
-  checked: boolean,
-  name: string,
-  value: string
+    disabled: boolean,
+    checked: boolean,
+    name: string,
+    value: string
 }
 
-const name = 's-radio-button'
+const name         = 's-radio-button'
 const props: Props = {
-  disabled: false,
-  checked: false,
-  name: '',
-  value: ''
+    disabled: false,
+    checked : false,
+    name    : '',
+    value   : ''
 }
 
 const style = /*css*/`
@@ -108,79 +108,82 @@ const template = /*html*/`
 `
 
 class RadioButton extends useElement({
-  style, template, props, syncProps: ['checked', 'disabled', 'name'],
-  setup() {
-    this.addEventListener('click', () => {
-      this.checked = true
-      if (this.name) {
-        document.querySelectorAll<typeof this>(`${this.tagName}[name='${this.name}']`).forEach((item) => {
-          if (item === this) return
-          item.checked = false
+    style, template, props, syncProps: ['checked', 'disabled', 'name'],
+    setup() {
+        this.addEventListener('click', () => {
+            this.checked = true
+            if (this.name) {
+                document.querySelectorAll<typeof this>(`${this.tagName}[name='${this.name}']`).forEach((item) => {
+                    if (item === this) return
+                    item.checked = false
+                })
+            }
+            this.dispatchEvent(new Event('change'))
         })
-      }
-      this.dispatchEvent(new Event('change'))
-    })
-  }
-}) { }
+    }
+}) {
+}
 
 RadioButton.define(name)
 
-export { RadioButton }
+export {RadioButton}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: RadioButton
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: RadioButton
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & RadioButton
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & RadioButton
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }

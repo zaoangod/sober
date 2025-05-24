@@ -1,18 +1,18 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
 import './ripple.js'
 
 type Props = {
-  disabled: boolean,
-  checked: boolean,
-  indeterminate: boolean
+    disabled: boolean,
+    checked: boolean,
+    indeterminate: boolean
 }
 
-const name = 's-checkbox'
+const name         = 's-checkbox'
 const props: Props = {
-  disabled: false,
-  checked: false,
-  indeterminate: false
+    disabled     : false,
+    checked      : false,
+    indeterminate: false
 }
 
 const style = /*css*/`
@@ -111,74 +111,77 @@ const template = /*html*/`
 `
 
 class Checkbox extends useElement({
-  style, template, props, syncProps: true,
-  setup() {
-    this.addEventListener('click', () => {
-      if (this.indeterminate) this.indeterminate = false
-      this.checked = !this.checked
-      this.dispatchEvent(new Event('change'))
-    })
-  }
-}) { }
+    style, template, props, syncProps: true,
+    setup() {
+        this.addEventListener('click', () => {
+            if (this.indeterminate) this.indeterminate = false
+            this.checked = !this.checked
+            this.dispatchEvent(new Event('change'))
+        })
+    }
+}) {
+}
 
-export { Checkbox }
+export {Checkbox}
 
 Checkbox.define(name)
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Checkbox
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Checkbox
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & Checkbox
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & Checkbox
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }

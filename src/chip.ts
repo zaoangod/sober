@@ -1,22 +1,22 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
 import './ripple.js'
 
 type Props = {
-  type: 'filled' | 'outlined'
-  value: string
-  checked: boolean
-  disabled: boolean
-  clickable: boolean
+    type: 'filled' | 'outlined'
+    value: string
+    checked: boolean
+    disabled: boolean
+    clickable: boolean
 }
 
-const name = 's-chip'
+const name         = 's-chip'
 const props: Props = {
-  type: 'filled',
-  value: '',
-  checked: false,
-  disabled: false,
-  clickable: false,
+    type     : 'filled',
+    value    : '',
+    checked  : false,
+    disabled : false,
+    clickable: false,
 }
 
 const style = /*css*/`
@@ -117,77 +117,80 @@ const template = /*html*/`
 `
 
 class Chip extends useElement({
-  style, template, props, syncProps: ['checked', 'clickable', 'disabled', 'type'],
-  setup(shadowRoot) {
-    const action = shadowRoot.querySelector<HTMLElement>('slot[name=action]')!
-    action.onclick = (e) => e.stopPropagation()
-    action.onpointerdown = (e) => e.stopPropagation()
-    this.addEventListener('click', () => {
-      if (!this.clickable) return
-      this.checked = !this.checked
-      this.dispatchEvent(new Event('change'))
-    })
-  }
-}) { }
+    style, template, props, syncProps: ['checked', 'clickable', 'disabled', 'type'],
+    setup(shadowRoot) {
+        const action         = shadowRoot.querySelector<HTMLElement>('slot[name=action]')!
+        action.onclick       = (e) => e.stopPropagation()
+        action.onpointerdown = (e) => e.stopPropagation()
+        this.addEventListener('click', () => {
+            if (!this.clickable) return
+            this.checked = !this.checked
+            this.dispatchEvent(new Event('change'))
+        })
+    }
+}) {
+}
 
 Chip.define(name)
 
-export { Chip }
+export {Chip}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Chip
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Chip
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & Chip
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & Chip
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }

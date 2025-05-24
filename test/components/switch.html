@@ -2,32 +2,30 @@
 <html lang="ZH-cn">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-  <script type="module" src="../../dist/main.js"></script>
-  <link rel="stylesheet" href="../styles/default.css">
-  <script type="module" src="../scripts/default.js"></script>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <script type="module" src="../../dist/main.js"></script>
+    <link rel="stylesheet" href="../styles/default.css">
+    <script type="module" src="../scripts/default.js"></script>
 </head>
 
 <body>
-  <s-page class="gap">
+<s-page class="gap">
     <s-switch></s-switch>
-    <s-switch checked="true">
-      <div slot="icon"></div>
+    <s-switch check="true">
+        <div slot="icon"></div>
     </s-switch>
     <hr>
-    <s-switch disabled="true"></s-switch>
-    <s-switch disabled="true" checked="true"></s-switch>
+    <s-switch disable="true"></s-switch>
+    <s-switch disable="true" check="true"></s-switch>
     <hr>
     <s-switch style="color: #009688">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" slot="icon">
-        <path
-          d="m354-287 126-76 126 77-33-144 111-96-146-13-58-136-58 135-146 13 111 97-33 143ZM233-120l65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Zm247-350Z">
-        </path>
-      </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" slot="icon">
+            <path d="m354-287 126-76 126 77-33-144 111-96-146-13-58-136-58 135-146 13 111 97-33 143ZM233-120l65-281L80-590l288-25 112-265 112 265 288 25-218 189 65 281-247-149-247 149Zm247-350Z"></path>
+        </svg>
     </s-switch>
-    <s-switch style="color: #b54e4e" checked="true"></s-switch>
-  </s-page>
+    <s-switch style="color: #b54e4e" check="true"></s-switch>
+</s-page>
 </body>
 
 </html>

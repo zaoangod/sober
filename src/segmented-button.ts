@@ -1,21 +1,21 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
-import { Select } from './core/utils/select.js'
-import { convertCSSDuration } from './core/utils/CSSUtils.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
+import {Select} from './core/utils/select.js'
+import {convertCSSDuration} from './core/utils/CSSUtils.js'
 import './ripple.js'
 
 type Props = {
-  value: string
-  mode: 'auto' | 'fiexd'
+    value: string
+    mode: 'auto' | 'fiexd'
 }
 
-const name = 's-segmented-button'
+const name         = 's-segmented-button'
 const props: Props = {
-  value: '',
-  mode: 'auto'
+    value: '',
+    mode : 'auto'
 }
 
-const style = /*css*/`
+const style    = /*css*/`
 :host{
   display: inline-flex;
   vertical-align: middle;
@@ -38,62 +38,63 @@ const style = /*css*/`
 const template = /*html*/`<slot></slot>`
 
 class SegmentedButton extends useElement({
-  style, template, props, syncProps: ['mode'],
-  setup(shadowRoot) {
-    const slot = shadowRoot.querySelector<HTMLSlotElement>('slot')!
-    const select = new Select({ context: this, class: SegmentedButtonItem, slot })
-    const computedStyle = getComputedStyle(this)
-    const getAnimateOptions = () => {
-      const easing = computedStyle.getPropertyValue('--s-motion-easing-standard') || Theme.motionEasingStandard
-      const duration = computedStyle.getPropertyValue('--s-motion-duration-medium4') || Theme.motionDurationMedium4
-      return { easing: easing, duration: convertCSSDuration(duration) }
+    style, template, props, syncProps: ['mode'],
+    setup(shadowRoot) {
+        const slot              = shadowRoot.querySelector<HTMLSlotElement>('slot')!
+        const select            = new Select({context: this, class: SegmentedButtonItem, slot})
+        const computedStyle     = getComputedStyle(this)
+        const getAnimateOptions = () => {
+            const easing   = computedStyle.getPropertyValue('--s-motion-easing-standard') || Theme.motionEasingStandard
+            const duration = computedStyle.getPropertyValue('--s-motion-duration-medium4') || Theme.motionDurationMedium4
+            return {easing: easing, duration: convertCSSDuration(duration)}
+        }
+        select.onUpdate         = (old) => {
+            if (!old || !select.select || !this.isConnected) return
+            const oldRect             = old.shadowRoot!.querySelector('.indicator')!.getBoundingClientRect()
+            const indicator           = select.select.shadowRoot!.querySelector<HTMLDivElement>('.indicator')!
+            const rect                = indicator.getBoundingClientRect()
+            const offset              = oldRect.left - rect.left
+            indicator.style.transform = `translateX(${rect.left > oldRect.left ? offset : Math.abs(offset)}px)`
+            indicator.style.width     = `${oldRect.width}px`
+            old.style.zIndex          = '1'
+            const animation           = indicator.animate([{transform: `translateX(0)`, width: `${rect.width}px`}], getAnimateOptions())
+            animation.onfinish        = animation.oncancel = animation.onremove = () => {
+                indicator.style.removeProperty('transform')
+                indicator.style.removeProperty('width')
+                old.style.removeProperty('z-index')
+            }
+        }
+        return {
+            expose: {
+                get options() {
+                    return select.list
+                },
+                get selectedIndex() {
+                    return select.selectedIndex
+                },
+            },
+            value : {
+                get: () => select.value,
+                set: (value) => select.value = value
+            }
+        }
     }
-    select.onUpdate = (old) => {
-      if (!old || !select.select || !this.isConnected) return
-      const oldRect = old.shadowRoot!.querySelector('.indicator')!.getBoundingClientRect()
-      const indicator = select.select.shadowRoot!.querySelector<HTMLDivElement>('.indicator')!
-      const rect = indicator.getBoundingClientRect()
-      const offset = oldRect.left - rect.left
-      indicator.style.transform = `translateX(${rect.left > oldRect.left ? offset : Math.abs(offset)}px)`
-      indicator.style.width = `${oldRect.width}px`
-      old.style.zIndex = '1'
-      const animation = indicator.animate([{ transform: `translateX(0)`, width: `${rect.width}px` }], getAnimateOptions())
-      animation.onfinish = animation.oncancel = animation.onremove = () => {
-        indicator.style.removeProperty('transform')
-        indicator.style.removeProperty('width')
-        old.style.removeProperty('z-index')
-      }
-    }
-    return {
-      expose: {
-        get options() {
-          return select.list
-        },
-        get selectedIndex() {
-          return select.selectedIndex
-        },
-      },
-      value: {
-        get: () => select.value,
-        set: (value) => select.value = value
-      }
-    }
-  }
-}) { }
-
-type ItemProps = {
-  selected: boolean
-  disabled: boolean
-  selectable: boolean
-  value: string
+}) {
 }
 
-const itemName = 's-segmented-button-item'
+type ItemProps = {
+    selected: boolean
+    disabled: boolean
+    selectable: boolean
+    value: string
+}
+
+const itemName             = 's-segmented-button-item'
 const itemProps: ItemProps = {
-  selected: false,
-  disabled: false,
-  selectable: true,
-  value: ''
+    selected  : false,
+    disabled  : false,
+    selectable: true,
+    value     : ''
 }
 
 const itemStyle = /*css*/`
@@ -174,98 +175,101 @@ const itemTemplate =/*html*/`
 `
 
 class SegmentedButtonItem extends useElement({
-  style: itemStyle,
-  template: itemTemplate,
-  props: itemProps,
-  syncProps: ['selected', 'disabled'],
-  setup() {
-    this.addEventListener('click', () => {
-      if (!(this.parentNode instanceof SegmentedButton) || this.selected) return
-      if (this.selectable) this.dispatchEvent(new Event(`${name}:select`, { bubbles: true }))
-    })
-    return {
-      selected: () => {
-        if (!(this.parentNode instanceof SegmentedButton)) return
-        this.dispatchEvent(new CustomEvent(`${name}:update`, { bubbles: true, detail: {} }))
-      }
+    style    : itemStyle,
+    template : itemTemplate,
+    props    : itemProps,
+    syncProps: ['selected', 'disabled'],
+    setup() {
+        this.addEventListener('click', () => {
+            if (!(this.parentNode instanceof SegmentedButton) || this.selected) return
+            if (this.selectable) this.dispatchEvent(new Event(`${name}:select`, {bubbles: true}))
+        })
+        return {
+            selected: () => {
+                if (!(this.parentNode instanceof SegmentedButton)) return
+                this.dispatchEvent(new CustomEvent(`${name}:update`, {bubbles: true, detail: {}}))
+            }
+        }
     }
-  }
-}) { }
+}) {
+}
 
 SegmentedButton.define(name)
 SegmentedButtonItem.define(itemName)
 
-export { SegmentedButton, SegmentedButtonItem }
+export {SegmentedButton, SegmentedButtonItem}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: SegmentedButton
-    [itemName]: SegmentedButtonItem
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-        //@ts-ignore
-        [itemName]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<ItemProps>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: SegmentedButton
+        [itemName]: SegmentedButtonItem
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+                //@ts-ignore
+                [itemName]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<ItemProps>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & SegmentedButton
-    [itemName]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<ItemProps>
-    } & SegmentedButtonItem
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & SegmentedButton
+        [itemName]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<ItemProps>
+        } & SegmentedButtonItem
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
-      //@ts-ignore
-      [itemName]: IntrinsicElements['div'] & Partial<ItemProps>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+            //@ts-ignore
+            [itemName]: IntrinsicElements['div'] & Partial<ItemProps>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
-      //@ts-ignore
-      [itemName]: JSX.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+            //@ts-ignore
+            [itemName]: JSX.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
-      //@ts-ignore
-      [itemName]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+            //@ts-ignore
+            [itemName]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<ItemProps>
+        }
     }
-  }
 }

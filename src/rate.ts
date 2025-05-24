@@ -1,21 +1,21 @@
-import { useElement } from './core/element.js'
-import { Theme } from './core/theme.js'
+import {useElement} from './core/element.js'
+import {Theme} from './core/theme.js'
 
 type Props = {
-  readOnly: boolean
-  max: number
-  min: number
-  value: number
-  step: number
+    readOnly: boolean
+    max: number
+    min: number
+    value: number
+    step: number
 }
 
-const name = 's-rate'
+const name         = 's-rate'
 const props: Props = {
-  readOnly: false,
-  max: 10,
-  min: 0,
-  value: 5,
-  step: 1
+    readOnly: false,
+    max     : 10,
+    min     : 0,
+    value   : 5,
+    step    : 1
 }
 
 const style = /*css*/`
@@ -94,99 +94,102 @@ const template = /*html*/`
 `
 
 class Rate extends useElement({
-  style, template, props, syncProps: ['readOnly'],
-  setup(shadowRoot) {
-    const indicator = shadowRoot.querySelector<HTMLDivElement>('.indicator')!
-    const input = shadowRoot.querySelector<HTMLInputElement>('input')!
-    const update = () => {
-      const value = Number(input.value)
-      const percentage = ((value - this.min) * 100) / this.max - this.min
-      indicator.style.width = `${percentage}%`
+    style, template, props, syncProps: ['readOnly'],
+    setup(shadowRoot) {
+        const indicator = shadowRoot.querySelector<HTMLDivElement>('.indicator')!
+        const input     = shadowRoot.querySelector<HTMLInputElement>('input')!
+        const update    = () => {
+            const value           = Number(input.value)
+            const percentage      = ((value - this.min) * 100) / this.max - this.min
+            indicator.style.width = `${percentage}%`
+        }
+        input.onchange  = () => this.dispatchEvent(new Event('change'))
+        input.oninput   = () => {
+            this.value = Number(input.value)
+            this.dispatchEvent(new Event('input'))
+        }
+        return {
+            max  : (value) => {
+                input.max = String(value)
+                update()
+            },
+            min  : (value) => {
+                input.min = String(value)
+                update()
+            },
+            step : (value) => {
+                input.step = String(value)
+                update()
+            },
+            value: (value) => {
+                input.value = String(value)
+                update()
+            }
+        }
     }
-    input.onchange = () => this.dispatchEvent(new Event('change'))
-    input.oninput = () => {
-      this.value = Number(input.value)
-      this.dispatchEvent(new Event('input'))
-    }
-    return {
-      max: (value) => {
-        input.max = String(value)
-        update()
-      },
-      min: (value) => {
-        input.min = String(value)
-        update()
-      },
-      step: (value) => {
-        input.step = String(value)
-        update()
-      },
-      value: (value) => {
-        input.value = String(value)
-        update()
-      }
-    }
-  }
-}) { }
+}) {
+}
 
 Rate.define(name)
 
-export { Rate }
+export {Rate}
 
 declare global {
-  interface HTMLElementTagNameMap {
-    [name]: Rate
-  }
-  namespace React {
-    namespace JSX {
-      interface IntrinsicElements {
-        //@ts-ignore
-        [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
-      }
+    interface HTMLElementTagNameMap {
+        [name]: Rate
     }
-  }
+
+    namespace React {
+        namespace JSX {
+            interface IntrinsicElements {
+                //@ts-ignore
+                [name]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> & Partial<Props>
+            }
+        }
+    }
 }
 
 //@ts-ignore
 declare module 'vue' {
-  //@ts-ignore
-  import { HTMLAttributes } from 'vue'
-  interface GlobalComponents {
-    [name]: new () => {
-      /**
-      * @deprecated
-      **/
-      $props: HTMLAttributes & Partial<Props>
-    } & Rate
-  }
+    //@ts-ignore
+    import {HTMLAttributes} from 'vue'
+
+    interface GlobalComponents {
+        [name]: new () => {
+            /**
+             * @deprecated
+             **/
+            $props: HTMLAttributes & Partial<Props>
+        } & Rate
+    }
 }
 
 //@ts-ignore
 declare module 'vue/jsx-runtime' {
-  namespace JSX {
-    export interface IntrinsicElements {
-      //@ts-ignore
-      [name]: IntrinsicElements['div'] & Partial<Props>
+    namespace JSX {
+        export interface IntrinsicElements {
+            //@ts-ignore
+            [name]: IntrinsicElements['div'] & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'solid-js' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSX.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
 
 //@ts-ignore
 declare module 'preact' {
-  namespace JSX {
-    interface IntrinsicElements {
-      //@ts-ignore
-      [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+    namespace JSX {
+        interface IntrinsicElements {
+            //@ts-ignore
+            [name]: JSXInternal.HTMLAttributes<HTMLElement> & Partial<Props>
+        }
     }
-  }
 }
